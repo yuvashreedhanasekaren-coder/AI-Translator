@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Register</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI, sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#ff9966,#ff5e62,#845ec2,#4d96ff);
+    background-size:400% 400%;
+    animation:bgMove 12s infinite alternate;
+}
+
+@keyframes bgMove{
+    0%{background-position:left;}
+    100%{background-position:right;}
+}
+
+.register-box{
+    backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.15);
+    padding:40px;
+    border-radius:18px;
+    width:360px;
+    text-align:center;
+    color:white;
+    box-shadow:0 0 50px rgba(0,0,0,0.35);
+}
+
+.register-box h2{
+    margin-bottom:15px;
+}
+
+input, select{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border-radius:8px;
+    border:none;
+    outline:none;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:8px;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    background:linear-gradient(90deg,#6366f1,#22d3ee);
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 15px rgba(255,255,255,0.7);
+}
+
+.login-link{
+    display:block;
+    margin-top:15px;
+    color:white;
+    text-decoration:none;
+}
+
+.login-link:hover{
+    text-decoration:underline;
+}
+
+.error{
+    color:#ffb3b3;
+    margin-bottom:10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<form class="register-box" method="POST" action="/register">
+
+    <h2>📝 Create Account</h2>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <input type="text" name="username" placeholder="👤 Full Name" required>
+
+    <input type="email" name="email" placeholder="📧 Email" required>
+
+    <input type="password" name="password" placeholder="🔒 Password" required>
+
+    <input type="password" name="confirm_password"
+           placeholder="🔒 Confirm Password" required>
+
+    <select name="purpose" required>
+        <option value="">Purpose of using</option>
+        <option value="personal">Personal</option>
+        <option value="education">Education</option>
+    </select>
+
+    <button type="submit">🚀 Register</button>
+
+    <a href="/login" class="login-link">
+        Already have an account? Login
+    </a>
+
+</form>
+
+</body>
+</html>

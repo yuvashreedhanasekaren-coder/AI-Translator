@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Translated Video Output</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI, sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#ff9966,#ff5e62,#845ec2,#4d96ff);
+    background-size:400% 400%;
+    animation:bgMove 12s infinite alternate;
+}
+
+@keyframes bgMove{
+    0%{background-position:left;}
+    100%{background-position:right;}
+}
+
+.output-box{
+    backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.15);
+    padding:40px;
+    border-radius:18px;
+    width:420px;
+    text-align:center;
+    color:white;
+    box-shadow:0 0 50px rgba(0,0,0,0.35);
+}
+
+.output-box h2{
+    margin-bottom:20px;
+}
+
+.video-box video{
+    width:300px;
+    max-width:100%;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.4);
+}
+
+.download-btn{
+    display:inline-block;
+    margin-top:20px;
+    padding:10px 20px;
+    background:linear-gradient(90deg,#6366f1,#22d3ee);
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+    transition:0.3s;
+}
+
+.download-btn:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 15px rgba(255,255,255,0.7);
+}
+
+/* ✅ Right Side Subtitle Info Panel */
+.subtitle-info-panel{
+    position:fixed;
+    right:40px;
+    top:50%;
+    transform:translateY(-50%);
+    width:280px;
+    backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.15);
+    padding:20px;
+    border-radius:16px;
+    color:white;
+    font-size:14px;
+    line-height:1.6;
+    box-shadow:0 0 40px rgba(0,0,0,0.3);
+}
+
+/* 🔥 Floating Back Buttons */
+.back-video-btn{
+    position:fixed;
+    bottom:70px;
+    left:20px;
+    padding:12px 22px;
+    background:#22d3ee;
+    color:black;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+.back-youtube-btn{
+    position:fixed;
+    bottom:20px;
+    left:20px;
+    padding:12px 22px;
+    background:#facc15;
+    color:black;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+.back-video-btn:hover{
+    background:#0ea5e9;
+}
+
+.back-youtube-btn:hover{
+    background:#eab308;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="output-box">
+
+    <h2>🎬 Translated Video Ready</h2>
+
+    <div class="video-box">
+        <video width="600" controls>
+            <source src="{{ url_for('uploaded_file', filename=translated_video) }}" type="video/mp4">
+        </video>
+    </div>
+
+    <a class="download-btn"
+       href="{{ url_for('uploaded_file', filename=translated_video) }}"
+       download>
+       ⬇ Download Video
+    </a>
+
+</div>
+
+<!-- ✅ Right Side Subtitle Information Panel -->
+<div class="subtitle-info-panel">
+    <strong>ℹ Subtitle Information</strong><br><br>
+    This video contains embedded soft subtitles.<br><br>
+    If subtitles are not visible in your browser, 
+    please download the video and open it using 
+    <strong>VLC Media Player</strong>.<br><br>
+    Then go to <em>Subtitle → Sub Track</em> 
+    and select the available subtitle track.
+</div>
+
+<!-- Back to Video Translation -->
+<a href="/video_translation" class="back-video-btn">
+    ⬅ Back to Video Translation
+</a>
+
+<!-- Back to YouTube Translation -->
+<a href="/youtube_translation" class="back-youtube-btn">
+    ⬅ Back to YouTube Translation
+</a>
+
+</body>
+</html>

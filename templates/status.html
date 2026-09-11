@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Translation Status</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            background: #111827;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+
+        .status-box {
+            background: #1f2937;
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .status-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .current-status {
+            font-size: 24px;
+            font-weight: bold;
+            color: #38bdf8;
+        }
+
+        .progress-container {
+            margin-top: 25px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 18px;
+            background: #374151;
+            border-radius: 50px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 10%;
+            background: linear-gradient(to right, #06b6d4, #3b82f6);
+            transition: 0.5s;
+        }
+
+        .steps {
+            margin-top: 30px;
+            line-height: 2;
+            font-size: 18px;
+        }
+
+        .video-section {
+            display: none;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 16px;
+            margin-top: 20px;
+        }
+
+        .success {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .loading {
+            color: #facc15;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>AI YouTube Translation Pipeline</h1>
+
+    <div class="status-box">
+        <div class="status-title">Current Processing Status</div>
+        <div class="current-status" id="statusText">
+            Starting...
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="steps" id="stepsBox">
+            ⏳ Initializing...
+        </div>
+    </div>
+
+    <div class="video-section" id="videoSection">
+        <h2 class="success">✅ Translated Video Ready!</h2>
+
+        <video controls>
+            <source id="videoSource" src="" type="video/mp4">
+        </video>
+    </div>
+
+</div>
+
+<script>
+    const jobId = "{{ job_id }}";
+
+    function getProgress(status) {
+        const progressMap = {
+            "processing": 10,
+            "downloading": 20,
+            "extracting_audio": 40,
+            "transcribing": 60,
+            "merging": 85,
+            "completed": 100
+        };
+
+        return progressMap[status] || 10;
+    }
+
+    function getSteps(status) {
+        return `
+            ${status === "downloading" || status === "extracting_audio" || status === "transcribing" || status === "merging" || status === "completed" ? "✅" : "⬜"} Video Downloaded<br>
+
+            ${status === "extracting_audio" || status === "transcribing" || status === "merging" || status === "completed" ? "✅" : "⬜"} Audio Extracted<br>
+
+            ${status === "transcribing" || status === "merging" || status === "completed" ? "✅" : "⬜"} Transcription Completed<br>
+
+            ${status === "merging" || status === "completed" ? "✅" : "⬜"} Translation + Voice Generated<br>
+
+            ${status === "completed" ? "✅" : "⬜"} Final Merge Completed
+        `;
+    }
+
+    async function checkStatus() {
+        try {
+            const response = await fetch(`/video_status/${jobId}`);
+            const data = await response.json();
+
+            document.getElementById("statusText").innerText =
+                data.status.replaceAll("_", " ").toUpperCase();
+
+            document.getElementById("progressFill").style.width =
+                getProgress(data.status) + "%";
+
+            document.getElementById("stepsBox").innerHTML =
+                getSteps(data.status);
+
+            if (data.completed) {
+
+    alert("🎉 Your translated video is ready!");
+
+    window.location.href =
+        `/final_video/${jobId}`;
+
+    clearInterval(statusInterval);
+}
+
+            if (data.status === "error") {
+                alert("❌ Error while processing video");
+                clearInterval(statusInterval);
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    checkStatus();
+
+    const statusInterval = setInterval(checkStatus, 3000);
+</script>
+
+</body>
+</html>

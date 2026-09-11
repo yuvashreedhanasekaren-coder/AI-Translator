@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Translator Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    height:100vh;
+    background:linear-gradient(135deg,#0f172a,#1e40af,#0ea5e9);
+    color:white;
+    display:flex;
+    flex-direction:column;
+}
+
+/* Top Navigation */
+.navbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:25px 60px;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:600;
+    letter-spacing:1px;
+}
+
+.logout{
+    padding:8px 18px;
+    border:none;
+    border-radius:8px;
+    background:#ef4444;
+    color:white;
+    cursor:pointer;
+    font-size:14px;
+    transition:0.3s;
+}
+
+.logout:hover{
+    background:#dc2626;
+}
+
+/* Main Center Content */
+.main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:0 20px;
+}
+
+/* Welcome */
+.welcome{
+    font-size:52px;
+    font-weight:700;
+    margin-bottom:20px;
+}
+
+.user-highlight{
+    background:linear-gradient(90deg,#facc15,#fb923c);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+/* Subtitle */
+.subtitle{
+    font-size:20px;
+    color:#e2e8f0;
+    max-width:750px;
+    line-height:1.8;
+    margin-bottom:50px;
+}
+
+/* Button Row */
+.buttons{
+    display:flex;
+    gap:25px;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+
+.option-btn{
+    padding:16px 34px;
+    border:none;
+    border-radius:50px;
+    font-size:16px;
+    font-weight:600;
+    color:white;
+    cursor:pointer;
+    background:linear-gradient(90deg,#6366f1,#22d3ee);
+    transition:0.3s ease;
+}
+
+.option-btn:hover{
+    transform:scale(1.08);
+    box-shadow:0 15px 30px rgba(0,0,0,0.4);
+}
+
+/* Floating Image */
+.dashboard-image{
+    margin-top:60px;
+    width:600px;
+    border-radius:20px;
+    animation:float 4s ease-in-out infinite;
+}
+
+@keyframes float{
+    0%{ transform:translateY(0px); }
+    50%{ transform:translateY(-15px); }
+    100%{ transform:translateY(0px); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="logo">🤖 AI Translator</div>
+
+    <a href="/logout">
+        <button class="logout">Logout</button>
+    </a>
+</div>
+
+<div class="main">
+
+    <div class="welcome">
+        Welcome back, <span class="user-highlight">{{ username }}</span>👋
+    </div>
+
+    <div class="subtitle">
+        You are successfully logged in to your AI Translator Dashboard.
+        Start translating videos, images or join a live meeting session instantly.
+    </div>
+
+    <div class="buttons">
+        <a href="/image"><button class="option-btn">🖼️ Image Translation</button></a>
+        <a href="/video"><button class="option-btn">🎬 Video Translation</button></a>
+        <a href="/live-meeting"><button class="option-btn">📡 Live Meeting</button></a>
+        <a href="/text-translation"><button class="option-btn">📘 Text Dictionary</button></a> 
+    </div>
+
+    <img src="{{ url_for('static', filename='home_image.avif') }}" 
+         class="dashboard-image">
+
+</div>
+
+</body>
+</html>

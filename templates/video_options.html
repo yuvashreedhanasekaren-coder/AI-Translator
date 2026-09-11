@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Select Video Type</title>
+
+<style>
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(120deg,#0f172a,#1e3a8a);
+    font-family:Segoe UI,sans-serif;
+    color:white;
+}
+
+.container{
+    text-align:center;
+}
+
+button{
+    padding:15px 35px;
+    margin:15px;
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+    cursor:pointer;
+    color:white;
+    background:linear-gradient(90deg,#6366f1,#22d3ee);
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+}
+/* Back button */
+.back{
+    position:fixed;
+    bottom:20px;
+    left:20px;
+    width:auto;
+    padding:10px 18px;
+    background:#ef4444;
+}
+
+.back:hover{
+    background:#dc2626;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+    <h1>🎬 Select Video Translation Type</h1>
+
+    <br>
+
+    <a href="/video_translation">
+        <button>📁 Recorded Video Translation</button>
+    </a>
+
+    <br>
+
+    <a href="/youtube_translation">
+        <button>📺 YouTube Video Translation</button>
+    </a>
+
+</div>
+
+<a href="/home">
+    <button class="back">⬅ Back Home</button>
+</a>
+
+</body>
+</html>

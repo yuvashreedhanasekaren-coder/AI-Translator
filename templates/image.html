@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Image Translation</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI, sans-serif;
+}
+
+/* Animated Background */
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#1d2671,#c33764,#845ec2,#4d96ff);
+    background-size:400% 400%;
+    animation:bgMove 12s infinite alternate;
+    color:white;
+}
+
+@keyframes bgMove{
+    0%{background-position:left;}
+    100%{background-position:right;}
+}
+
+/* Glass container */
+.container{
+    backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.15);
+    padding:35px;
+    border-radius:20px;
+    width:360px;
+    text-align:center;
+    box-shadow:0 0 40px rgba(0,0,0,0.4);
+}
+
+/* Title */
+h1{
+    margin-bottom:20px;
+}
+
+/* Hide default file input */
+input[type="file"]{
+    display:none;
+}
+
+/* Slim File Bar */
+.file-wrapper{
+    display:flex;
+    align-items:center;
+    padding:6px;
+    border-radius:40px;
+    background:rgba(255,255,255,0.18);
+    backdrop-filter:blur(12px);
+    margin:20px 0;
+}
+
+/* Small white choose button */
+.file-btn{
+    background:white;
+    color:#333;
+    padding:6px 16px;
+    border-radius:30px;
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+}
+
+/* File name */
+.file-name{
+    margin-left:14px;
+    font-size:14px;
+    opacity:0.9;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+/* Select */
+select{
+    width:100%;
+    padding:10px;
+    margin-bottom:15px;
+    border:none;
+    border-radius:8px;
+}
+
+/* Buttons */
+button{
+    width:100%;
+    padding:11px;
+    border:none;
+    border-radius:8px;
+    color:white;
+    font-size:15px;
+    cursor:pointer;
+    background:linear-gradient(90deg,#6366f1,#22d3ee);
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 15px rgba(255,255,255,0.6);
+}
+
+/* Back button */
+.back{
+    position:fixed;
+    bottom:20px;
+    left:20px;
+    width:auto;
+    padding:10px 18px;
+    background:#ef4444;
+}
+
+.back:hover{
+    background:#dc2626;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+    <h1>🖼️ Image Translation</h1>
+
+    <div style="margin:20px;">
+        <img src="{{ url_for('static', filename='image_trans.jpg') }}" width="250">
+    </div>
+
+    <form action="/image" method="post" enctype="multipart/form-data">
+
+        <!-- Hidden File Input -->
+        <input type="file" id="imageInput" name="image" required>
+
+        <!-- Custom Slim File Upload -->
+        <div class="file-wrapper">
+            <label for="imageInput" class="file-btn">
+                Choose File
+            </label>
+            <div class="file-name" id="fileName">
+                No file chosen
+            </div>
+        </div>
+
+        <select name="target_lang" required>
+            <option value="ta">Tamil</option>
+            <option value="te">Telugu</option>
+            <option value="kn">Kannada</option>
+            <option value="en">English</option>
+        </select>
+
+        <button type="submit">🌍 Translate Image</button>
+
+    </form>
+</div>
+
+<a href="/home">
+    <button class="back">⬅ Back Home</button>
+</a>
+
+<script>
+const input = document.getElementById("imageInput");
+const fileName = document.getElementById("fileName");
+
+input.addEventListener("change", function(){
+    if(this.files.length > 0){
+        fileName.textContent = this.files[0].name;
+    } else {
+        fileName.textContent = "No file chosen";
+    }
+});
+</script>
+
+</body>
+</html>

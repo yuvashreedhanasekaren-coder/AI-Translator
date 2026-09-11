@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Translator</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+
+background:
+radial-gradient(circle at 20% 20%, #6366f1 0%, transparent 40%),
+radial-gradient(circle at 80% 70%, #06b6d4 0%, transparent 40%),
+#0f172a;
+}
+
+/* MAIN CONTAINER */
+.container{
+width:1050px;
+background:rgba(255,255,255,0.12);
+backdrop-filter:blur(25px);
+border-radius:22px;
+padding:40px;
+border:1px solid rgba(255,255,255,0.25);
+box-shadow:
+0 25px 60px rgba(0,0,0,0.35),
+inset 0 1px 0 rgba(255,255,255,0.4);
+color:white;
+}
+
+/* HEADER */
+.header{
+text-align:center;
+margin-bottom:35px;
+}
+
+.header h1{
+font-size:28px;
+font-weight:600;
+}
+
+/* GRID */
+.translator{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:30px;
+}
+
+/* BOX */
+.box{
+background:rgba(255,255,255,0.15);
+border-radius:16px;
+padding:22px;
+}
+
+/* LABEL */
+.label{
+font-size:13px;
+margin-bottom:8px;
+opacity:0.8;
+}
+
+/* TEXTAREA */
+textarea{
+width:100%;
+border:none;
+border-radius:12px;
+padding:14px;
+font-size:14px;
+resize:none;
+outline:none;
+margin-bottom:12px;
+background:white;
+color:#1e293b;
+}
+
+textarea{
+height:120px;
+}
+
+.small{
+height:80px;
+} 
+
+.box{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+/* SMALL TEXTAREA */
+.small{
+height:100px;
+}
+
+/* DROPDOWN */
+select{
+width:100%;
+padding:10px;
+border:none;
+border-radius:10px;
+margin-bottom:12px;
+}
+
+/* BUTTON */
+button{
+padding:12px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+/* TRANSLATE */
+.translate{
+width:100%;
+background:#6366f1;
+color:white;
+}
+
+/* ACTIONS */
+.actions{
+display:flex;
+gap:10px;
+margin-top:10px;
+}
+
+.copy{
+flex:1;
+background:#64748b;
+color:white;
+position:relative;
+}
+
+.voice{
+flex:1;
+background:#f59e0b;
+color:white;
+}
+
+audio{
+width:100%;
+margin-top:12px;
+}
+
+/* SUCCESS POPUP */
+#copiedBubble{
+position:absolute;
+bottom:60px;
+left:50%;
+transform:translateX(-50%) scale(0);
+background:#22c55e;
+color:white;
+padding:6px 14px;
+font-size:12px;
+border-radius:20px;
+transition:0.3s;
+}
+
+#copiedBubble.show{
+transform:translateX(-50%) scale(1);
+}
+
+/* MOBILE */
+@media(max-width:900px){
+.translator{
+grid-template-columns:1fr;
+}
+}
+
+.back{
+position:fixed;
+bottom:20px;
+left:20px;
+background:#ef4444;
+color:white;
+}
+
+/* CLOUD BUBBLE */ #copiedBubble{ position:absolute; bottom:60px; left:50%; transform:translateX(-50%) scale(0); background:#22c55e; color:white; padding:10px 18px; font-size:12px; white-space:nowrap; transition:0.25s; box-shadow:0 8px 18px rgba(0,0,0,0.25); border-radius:30px; } /* ARROW */ #copiedBubble span{ position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:7px solid #22c55e; } /* SHOW */ #copiedBubble.show{ transform:translateX(-50%) scale(1); }
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+<h1>🌍 AI Language Translator</h1>
+</div>
+
+<form onsubmit="event.preventDefault(); translateText();">
+
+<div class="translator">
+
+<!-- LEFT -->
+<div class="box">
+
+<div class="label">✍️ Input Text</div>
+
+<textarea name="input_text">{{input_text}}</textarea>
+
+<select name="output_lang">
+<option value="ta">Tamil</option>
+<option value="hi">Hindi</option>
+<option value="te">Telugu</option>
+<option value="ml">Malayalam</option>
+<option value="kn">Kannada</option>
+<option value="en">English</option>
+</select>
+
+<button type="submit" class="translate">Translate</button>
+
+</div>
+
+<!-- RIGHT -->
+<div class="box">
+
+<div class="label">📄 Translation</div>
+<textarea id="outputText" readonly>{{translated_text}}</textarea>
+
+<div style="margin-top:15px;">
+<b>Example Sentence:</b><br>
+<p id="exampleBox">{{ example_sentence }}</p>
+</div>
+
+<div class="actions">
+
+<button type="button" class="copy" onclick="copyText()">
+Copy
+<div id="copiedBubble"> ✔ Copied! <span></span> </div>
+</button>
+
+<button type="button" class="voice" onclick="generateVoice()">
+Voice
+</button>
+
+</div>
+
+<audio id="audioPlayer" controls></audio>
+
+</div>
+
+</div>
+
+</form>
+
+</div>
+
+<a href="/home">
+<button class="back">⬅ Back</button>
+</a>
+
+<p style="color:red;">{{ meaning }}</p>
+<p style="color:yellow;">{{ sentence }}</p>
+
+<script>
+function translateText(){
+
+let text = document.querySelector("textarea[name='input_text']").value;
+let lang = document.querySelector("select").value;
+
+fetch("/text-translation",{
+method:"POST",
+headers:{
+"Content-Type":"application/x-www-form-urlencoded"
+},
+body:`input_text=${encodeURIComponent(text)}&output_lang=${lang}`
+})
+.then(res=>res.text())
+.then(html=>{
+
+let parser = new DOMParser();
+let doc = parser.parseFromString(html,"text/html");
+
+document.getElementById("outputText").value =
+doc.querySelector("#outputText").value;
+
+document.getElementById("exampleBox").innerHTML =
+doc.querySelector("#exampleBox").innerHTML;
+
+});
+}
+function copyText(){
+let text=document.getElementById("outputText").value;
+navigator.clipboard.writeText(text);
+
+let bubble=document.getElementById("copiedBubble");
+bubble.classList.add("show");
+
+setTimeout(()=>{
+bubble.classList.remove("show");
+},1500);
+}
+
+function generateVoice(){
+
+let text=document.getElementById("outputText").value;
+let lang=document.querySelector("select").value;
+
+fetch("/speak",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+text:text,
+lang:lang
+})
+})
+.then(res=>res.json())
+.then(data=>{
+let player=document.getElementById("audioPlayer");
+player.src=data.audio_url+"?t="+new Date().getTime();
+player.play();
+})
+
+}
+
+</script>
+
+</body>
+</html>

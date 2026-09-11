@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Translation Output</title>
+
+<style>
+body{
+    font-family:Segoe UI;
+    background:linear-gradient(120deg,#141e30,#243b55);
+    color:white;
+    text-align:center;
+    margin:0;
+    padding:0;
+}
+
+/* Main container */
+.box{
+    display:flex;
+    flex-direction:row;   /* CHANGED: column → row */
+    align-items:flex-start;
+    justify-content:center;
+    margin-top:30px;
+    width:100%;
+    gap:40px;              /* added spacing */
+}
+
+/* Image styling */
+img{
+    width:350px;
+    border-radius:10px;
+    margin:15px;
+    box-shadow:0 0 15px rgba(0,0,0,0.4);
+}
+
+/* Text areas */
+textarea{
+    width:350px;           /* adjusted width */
+    height:250px;
+    margin:10px 0;
+    padding:12px;
+    border-radius:8px;
+    border:none;
+    resize:none;
+    font-size:15px;
+}
+button{
+    padding:12px 22px;
+    margin:10px;
+    border:none;
+    border-radius:8px;
+    background:#22d3ee;
+    color:black;
+    font-size:15px;
+    cursor:pointer;
+    transition:0.3s;
+}
+button:hover{
+    background:#0ea5e9;
+    transform:scale(1.05);
+}
+/* Back button fixed */
+.back-home-btn{
+    position:fixed;
+    bottom:20px;
+    left:20px;
+    padding:12px 22px;
+    background:#22d3ee;
+    color:black;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:bold;
+}
+.back-home-btn:hover{
+    background:#0ea5e9;
+}
+.arrow{
+    font-size:40px;
+    align-self:center;
+    margin:0 10px;
+}
+</style>
+</head>
+<body>
+<h2>Translation Result</h2>
+<div class="box">
+<div>
+<h3>Original Image</h3>
+<img src="{{ url_for('uploaded_file', filename=image_filename) }}">
+</div>
+<div class="arrow">➡️</div>
+<div>
+<h3>Translated Text</h3>
+<textarea id="translated" readonly>{{ translated }}</textarea>
+<br>
+<button onclick="downloadText()">Download Text</button>
+</div>
+</div>
+<a href="/image" class="back-home-btn">  ⬅ Back </a>
+<script>
+function downloadText(){
+    let text = document.getElementById("translated").value;
+    let blob = new Blob([text], { type: "text/plain" });
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "translated_text.txt";
+    link.click();
+}
+</script>
+</body>
+</html>

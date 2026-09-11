@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>YouTube Translation</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI,sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#1d2671,#c33764,#845ec2,#4d96ff);
+    background-size:400% 400%;
+    animation:bgMove 12s infinite alternate;
+    color:white;
+}
+
+@keyframes bgMove{
+    0%{background-position:left;}
+    100%{background-position:right;}
+}
+
+.container{
+    backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.15);
+    padding:40px;
+    border-radius:20px;
+    width:420px;
+    text-align:center;
+    box-shadow:0 0 40px rgba(0,0,0,0.4);
+}
+
+/* FORM ALIGNMENT */
+form{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+/* URL INPUT */
+.url-input{
+    width:100%;
+    padding:12px;
+    margin:15px 0;
+    border:none;
+    border-radius:8px;
+    outline:none;
+}
+
+/* SMALL CENTERED DROPDOWN */
+.lang-select{
+    width:60%;
+    padding:10px;
+    margin-bottom:15px;
+    border:none;
+    border-radius:8px;
+    outline:none;
+    text-align:center;
+}
+
+/* BUTTON */
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    background:linear-gradient(90deg,#6366f1,#22d3ee);
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 15px rgba(255,255,255,0.7);
+}
+
+.back-home-btn{
+    position:fixed;
+    bottom:20px;
+    left:20px;
+    padding:12px 22px;
+    background:#22d3ee;
+    color:black;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:bold;
+}
+.back-home-btn:hover{
+    background:#0ea5e9;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>📺 YouTube Translation 🌍</h1>
+
+    <form method="POST">
+
+        <input type="text"
+               name="youtube_url"
+               class="url-input"
+               placeholder="Paste YouTube URL here..."
+               required>
+
+        <select name="language" class="lang-select">
+            <option value="ta">Tamil</option>
+            <option value="en">English</option>
+            <option value="te">Telugu</option>
+            <option value="kn">Kannada</option>
+        </select>
+
+        <button type="submit">🚀 Translate Video</button>
+
+    </form>
+
+</div>
+
+<a href="/video" class="back-home-btn">
+    ⬅ Back
+</a>
+
+
+</body>
+</html>

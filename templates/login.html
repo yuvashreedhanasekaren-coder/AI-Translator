@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI, sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:linear-gradient(135deg,#ff9966,#ff5e62,#845ec2,#4d96ff);
+    background-size:400% 400%;
+    animation:bgMove 12s infinite alternate;
+}
+
+@keyframes bgMove{
+    0%{background-position:left;}
+    100%{background-position:right;}
+}
+
+/* Glass Login Box */
+.login-box{
+    backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.15);
+    padding:40px;
+    border-radius:18px;
+    width:340px;
+    text-align:center;
+    color:white;
+    box-shadow:0 0 50px rgba(0,0,0,0.35);
+}
+
+.login-box h2{
+    margin-bottom:20px;
+    letter-spacing:1px;
+}
+
+/* Input fields */
+input{
+    width:100%;
+    padding:12px;
+    margin:12px 0;
+    border-radius:8px;
+    border:none;
+    outline:none;
+    font-size:14px;
+}
+
+/* Forgot password link */
+a{
+    color:#fff;
+    text-decoration:none;
+    font-size:14px;
+    display:block;
+    margin-top:5px;
+}
+
+a:hover{
+    text-decoration:underline;
+}
+
+/* Button style */
+button{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:8px;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    background:linear-gradient(90deg,#6366f1,#22d3ee);
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 15px rgba(255,255,255,0.7);
+}
+</style>
+
+</head>
+
+<body>
+
+<form class="login-box" action="{{ url_for('login') }}" method="POST">
+    
+    <h2>🤖 AI Translator Login 🌍</h2>
+
+    <input type="text" name="username"
+       value="{{ username or '' }}"
+       placeholder="👤 Enter Username" required>
+
+    <input type="password" name="password"
+       value="{{ password or '' }}"
+       placeholder="🔒 Enter Password" required>
+       
+    <!-- ERROR MESSAGE HERE -->
+    {% if error %}
+        <p style="color:#ff4d4d; margin-top:5px;">
+            {{ error }}
+        </p>
+    {% endif %}
+
+    <a href="/forgot_page">Forgot Password?</a>
+
+    <button type="submit">🚀 Login Now</button>
+</form>
+
+</body>
+</html>

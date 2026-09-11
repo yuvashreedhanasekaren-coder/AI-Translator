@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Account Exists</title>
+<style>
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#ff5e62,#845ec2);
+    font-family:Segoe UI;
+}
+.box{
+    background:white;
+    padding:40px;
+    border-radius:15px;
+    text-align:center;
+    width:350px;
+}
+h2{
+    color:red;
+    font-size:22px;
+}
+button{
+    padding:10px 20px;
+    margin:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+.register{background:#ff5e62;color:white;}
+.login{background:#4d96ff;color:white;}
+
+</style>
+</head>
+<body>
+<div class="box">
+<h2>⚠ You already have an account with us!</h2>
+<br>
+<button class="register" onclick="location.href='/'">Register</button>
+<button class="login" onclick="location.href='/login'">Login</button>
+</div>
+</body>
+</html>

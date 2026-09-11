@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Verify OTP</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI, sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#ff9966,#ff5e62,#845ec2,#4d96ff);
+    background-size:400% 400%;
+    animation:bgMove 12s infinite alternate;
+}
+
+@keyframes bgMove{
+    0%{background-position:left;}
+    100%{background-position:right;}
+}
+
+/* Glass Box */
+.box{
+    backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.15);
+    padding:40px;
+    border-radius:18px;
+    width:340px;
+    text-align:center;
+    color:white;
+    box-shadow:0 0 50px rgba(0,0,0,0.35);
+}
+
+.box h2{
+    margin-bottom:20px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin:12px 0;
+    border-radius:8px;
+    border:none;
+    outline:none;
+    text-align:center;
+    font-size:16px;
+    letter-spacing:3px;
+}
+
+/* Button */
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    background:linear-gradient(90deg,#6366f1,#22d3ee);
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 15px rgba(255,255,255,0.7);
+}
+
+/* Error */
+.error{
+    color:#ffdddd;
+    background:#a94442;
+    padding:8px;
+    border-radius:6px;
+    margin-top:10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+    <h2>🔓 Verify Your New Account</h2>
+
+    <form method="POST">
+        <input type="text" name="otp" placeholder="Enter OTP" required>
+        <button type="submit">Verify OTP</button>
+    </form>
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+</div>
+
+</body>
+</html>
