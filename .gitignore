@@ -1,0 +1,27 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment / secrets
+.env
+
+# Database
+*.db
+*.sqlite3
+
+# Uploaded and generated files
+uploads/
+
+# Audio / video files
+*.wav
+*.mp3
+*.mp4
+*.mkv
+*.webm
+*.srt
+
+# YouTube cookies
+cookies.txt
