@@ -56,6 +56,37 @@ body{
     box-shadow:0 8px 25px rgba(0,0,0,0.5);
 }
 
+.profile-container{
+    position:relative;
+}
+
+.profile-menu{
+    position:absolute;
+    top:60px;
+    right:0;
+    width:180px;
+    background:white;
+    border-radius:12px;
+    padding:8px 0;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+    display:none;
+    z-index:1000;
+}
+
+.profile-menu a{
+    display:block;
+    padding:12px 18px;
+    color:#1e293b;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+    transition:0.2s;
+}
+
+.profile-menu a:hover{
+    background:#f1f5f9;
+}
+
 /* Main Center Content */
 .main{
     flex:1;
@@ -135,9 +166,20 @@ body{
 <div class="navbar">
     <div class="logo">🤖 AI Translator</div>
 
-     <div class="profile-circle">
+    <div class="profile-container">
+
+    <div class="profile-circle" onclick="toggleProfileMenu()">
         {{ username[0]|upper }}
     </div>
+
+    <div class="profile-menu" id="profileMenu">
+        <a href="/profile">👤 View Details</a>
+        <a href="/admin">🛡️ Admin</a>
+        <a href="/logout">🚪 Logout</a>
+    </div>
+
+</div>
+
 </div>
 
 <div class="main">
@@ -164,4 +206,17 @@ body{
 </div>
 
 </body>
+
+<script>
+function toggleProfileMenu() {
+    const menu = document.getElementById("profileMenu");
+
+    if (menu.style.display === "block") {
+        menu.style.display = "none";
+    } else {
+        menu.style.display = "block";
+    }
+}
+</script>
+
 </html>
