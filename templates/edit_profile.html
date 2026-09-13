@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Profile - AI Translator</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Poppins',sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(184,115,51,0.22), transparent 30%),
+                radial-gradient(circle at 85% 80%, rgba(120,53,15,0.28), transparent 30%),
+                #1c1410;
+
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:30px;
+            color:#f8f1e7;
+        }
+
+        .edit-card{
+            width:460px;
+            padding:38px;
+
+            background:rgba(45,30,23,0.94);
+
+            border:1px solid rgba(205,133,63,0.28);
+            border-radius:24px;
+
+            box-shadow:
+                0 25px 70px rgba(0,0,0,0.55),
+                0 0 35px rgba(184,115,51,0.10);
+        }
+
+        .title{
+            text-align:center;
+            font-size:27px;
+            font-weight:700;
+            color:#f5e6d3;
+            margin-bottom:30px;
+        }
+
+        .form-group{
+            margin-bottom:20px;
+        }
+
+        label{
+            display:block;
+            font-size:13px;
+            font-weight:600;
+            color:#c9a98b;
+            margin-bottom:7px;
+        }
+
+        input,
+        select{
+            width:100%;
+            padding:13px 15px;
+
+            border-radius:11px;
+
+            border:1px solid rgba(205,133,63,0.18);
+
+            background:#302019;
+
+            color:#f8f1e7;
+
+            font-size:14px;
+
+            outline:none;
+        }
+
+        input:focus,
+        select:focus{
+            border-color:#c47a3a;
+            box-shadow:0 0 0 2px rgba(196,122,58,0.12);
+        }
+
+        select option{
+            background:#302019;
+            color:#f8f1e7;
+        }
+
+        .save-btn{
+            width:100%;
+            padding:14px;
+
+            border:none;
+            border-radius:12px;
+
+            background:linear-gradient(
+                135deg,
+                #b87333,
+                #d8893f
+            );
+
+            color:#fffaf3;
+
+            font-size:15px;
+            font-weight:600;
+
+            cursor:pointer;
+
+            transition:0.3s ease;
+        }
+
+        .save-btn:hover{
+            transform:translateY(-2px);
+
+            box-shadow:
+                0 10px 25px rgba(184,115,51,0.30);
+        }
+
+        .cancel-btn{
+            display:block;
+            text-align:center;
+
+            margin-top:17px;
+
+            color:#c9a98b;
+            text-decoration:none;
+
+            font-size:14px;
+        }
+
+        .cancel-btn:hover{
+            color:#e09a52;
+        }
+
+        @media(max-width:520px){
+
+            body{
+                padding:18px;
+            }
+
+            .edit-card{
+                width:100%;
+                padding:28px 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="edit-card">
+
+    <div class="title">
+        ✏️ Edit Profile
+    </div>
+
+    <form method="POST">
+
+        <div class="form-group">
+            <label>Full Name</label>
+
+            <input
+                type="text"
+                name="username"
+                value="{{ user['username'] }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+
+            <input
+                type="email"
+                name="email"
+                value="{{ user['email'] }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label>Purpose</label>
+
+            <select name="purpose" required>
+                <option value="personal"
+                    {% if user['purpose'] == 'personal' %}selected{% endif %}>
+                    Personal
+                </option>
+
+                <option value="education"
+                    {% if user['purpose'] == 'education' %}selected{% endif %}>
+                    Education
+                </option>
+            </select>
+        </div>
+
+        <button type="submit" class="save-btn">
+            💾 Save Changes
+        </button>
+
+    </form>
+
+    <a href="/profile" class="cancel-btn">
+        ← Cancel
+    </a>
+
+</div>
+
+</body>
+</html>
