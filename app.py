@@ -71,18 +71,29 @@ def close_connection(exception):
         db.close()
 
 def init_db():
+
     conn = sqlite3.connect("database.db")
+
     cursor = conn.cursor()
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE,
         email TEXT UNIQUE,
         password TEXT,
+        purpose TEXT,
         is_verified INTEGER DEFAULT 0,
         otp TEXT
     )
     """)
+
+    # Add purpose column to existing databases
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN purpose TEXT")
+    except sqlite3.OperationalError:
+        pass
+
     conn.commit()
     conn.close()
 
@@ -136,6 +147,7 @@ def register():
         username = request.form["username"]
         email = request.form["email"]
         password = request.form["password"]
+        purpose = request.form["purpose"]
 
         db = get_db()
 
@@ -151,9 +163,15 @@ def register():
         otp = str(random.randint(100000,999999))
 
         db.execute("""
-            INSERT INTO users(username,email,password,otp,is_verified)
-            VALUES (?,?,?,?,0)
-        """,(username,email,generate_password_hash(password),otp))
+    INSERT INTO users(username,email,password,purpose,otp,is_verified)
+    VALUES (?,?,?,?,?,0)
+""",(
+    username,
+    email,
+    generate_password_hash(password),
+    purpose,
+    otp
+))
 
         db.commit()
 
@@ -342,11 +360,15 @@ def image_page():
 
         try:
             translated = GoogleTranslator(
-                source='auto',
+                source="auto",
                 target=target_lang
             ).translate(text)
-        except:
-            translated = text
+
+            print("Translation successful:", translated)
+
+        except Exception as e:
+            print("IMAGE TRANSLATION ERROR:", repr(e))
+            translated = "Translation service temporarily unavailable."
 
         filename = os.path.basename(path)
 
@@ -900,7 +922,65 @@ def home():
 
     return render_template("home.html", username=session["username"])
 
-# print(app.url_map)
+# ---------- EDIT PROFILE ----------
+@app.route("/edit-profile", methods=["GET", "POST"])
+def edit_profile():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    db = get_db()
+
+    user = db.execute(
+        "SELECT username, email, purpose FROM users WHERE id=?",
+        (session["user_id"],)
+    ).fetchone()
+
+    if not user:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        email = request.form["email"]
+        purpose = request.form["purpose"]
+
+        db.execute("""
+            UPDATE users
+            SET username=?, email=?, purpose=?
+            WHERE id=?
+        """, (
+            username,
+            email,
+            purpose,
+            session["user_id"]
+        ))
+
+        db.commit()
+
+        session["username"] = username
+
+        return redirect(url_for("profile"))
+
+    return render_template("edit_profile.html", user=user)
+
+
+# ---------- PROFILE ----------
+@app.route("/profile")
+def profile():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    db = get_db()
+
+    user = db.execute(
+        "SELECT username, email, purpose FROM users WHERE id=?",
+        (session["user_id"],)
+    ).fetchone()
+
+    if not user:
+        return redirect(url_for("login"))
+
+    return render_template("profile.html", user=user)
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
