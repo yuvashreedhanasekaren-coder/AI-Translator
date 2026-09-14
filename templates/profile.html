@@ -107,18 +107,14 @@ body{
 }
 
 /* Edit Button */
-
 .edit-btn{
+    display:block;
     width:100%;
-
     margin-top:10px;
-
     padding:14px;
-
     border:none;
-
     border-radius:12px;
-
+    
     background:linear-gradient(
         135deg,
         #b87333,
@@ -126,30 +122,16 @@ body{
     );
 
     color:#fffaf3;
-
     font-size:15px;
-
     font-weight:600;
-
     cursor:pointer;
-
+    text-align:center;
+    text-decoration:none;
+    
     box-shadow:
         0 8px 25px rgba(184,115,51,0.25);
 
     transition:0.3s ease;
-}
-
-.edit-btn:hover{
-    transform:translateY(-2px);
-
-    background:linear-gradient(
-        135deg,
-        #c47a3a,
-        #e09a52
-    );
-
-    box-shadow:
-        0 12px 30px rgba(184,115,51,0.35);
 }
 
 /* Back Button */
@@ -172,6 +154,32 @@ body{
 
 .back-btn:hover{
     color:#e09a52;
+}
+
+.password-btn{
+    display:block;
+    width:100%;
+    margin-top:12px;
+    padding:14px;
+
+    border:1px solid #b87333;
+    border-radius:12px;
+
+    background:transparent;
+    color:#e0a064;
+
+    text-align:center;
+    text-decoration:none;
+
+    font-size:15px;
+    font-weight:600;
+
+    transition:0.3s ease;
+}
+
+.password-btn:hover{
+    background:rgba(184,115,51,0.12);
+    transform:translateY(-2px);
 }
 
 /* Mobile */
@@ -221,6 +229,10 @@ body{
 
     <a href="/edit-profile" class="edit-btn">
     ✏️ Edit Profile
+</a>
+
+    <a href="/change-password" class="password-btn">
+    🔐 Change Password
 </a>
 
     <a href="/home" class="back-btn">

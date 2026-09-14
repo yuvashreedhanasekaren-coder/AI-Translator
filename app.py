@@ -963,7 +963,135 @@ def edit_profile():
 
     return render_template("edit_profile.html", user=user)
 
+# ---------- CHANGE PASSWORD ----------
+@app.route("/change-password", methods=["GET", "POST"])
+def change_password():
 
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+
+        current_password = request.form["current_password"]
+        new_password = request.form["new_password"]
+        confirm_password = request.form["confirm_password"]
+
+        db = get_db()
+
+        user = db.execute(
+            "SELECT password FROM users WHERE id=?",
+            (session["user_id"],)
+        ).fetchone()
+
+        if not user:
+            return redirect(url_for("login"))
+
+        # Verify current password
+        if not check_password_hash(user["password"], current_password):
+            return render_template(
+                "change_password.html",
+                error="Current password is incorrect."
+            )
+
+        # Check new password and confirm password
+        if new_password != confirm_password:
+            return render_template(
+                "change_password.html",
+                error="New passwords do not match."
+            )
+
+        # Prevent using the same password
+        if current_password == new_password:
+            return render_template(
+                "change_password.html",
+                error="New password must be different from current password."
+            )
+
+        # Validate password strength
+        if not strong_password(new_password):
+            return render_template(
+                "change_password.html",
+                error="Password must contain at least 8 characters, one uppercase letter, one lowercase letter, and one number."
+            )
+
+        # Save hashed password
+        hashed_password = generate_password_hash(new_password)
+
+        db.execute(
+            "UPDATE users SET password=? WHERE id=?",
+            (hashed_password, session["user_id"])
+        )
+
+        db.commit()
+
+        return redirect(url_for("profile"))
+
+    return render_template("change_password.html")
+
+# ---------- ADMIN PASSWORD ----------
+@app.route("/admin-password", methods=["GET", "POST"])
+def admin_password():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+
+        admin_password = request.form["admin_password"]
+
+        # Temporary admin password
+        if admin_password != "Admin@123":
+            return render_template(
+                "admin_password.html",
+                error="Incorrect admin password."
+            )
+
+        session["is_admin"] = True
+
+        return redirect(url_for("admin_dashboard"))
+
+    return render_template("admin_password.html")
+
+# ---------- ADMIN DASHBOARD ----------
+@app.route("/admin-dashboard")
+def admin_dashboard():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    # Only verified admin can access
+    if not session.get("is_admin"):
+        return redirect(url_for("admin"))
+
+    db = get_db()
+
+    users = db.execute("""
+        SELECT id, username, email, purpose, is_verified
+        FROM users
+        ORDER BY id DESC
+    """).fetchall()
+
+    return render_template(
+        "admin_dashboard.html",
+        users=users
+    )
+
+# ---------- ADMIN ACCESS ----------
+@app.route("/admin")
+def admin():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    error = None
+
+    if request.args.get("denied") == "1":
+        error = "You are not allowed to access this page. This page is only for administrators."
+
+    return render_template(
+        "admin.html",
+        error=error
+    )
 # ---------- PROFILE ----------
 @app.route("/profile")
 def profile():
