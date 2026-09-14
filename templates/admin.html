@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>Admin Access - AI Translator</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Poppins',sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+
+            background:
+                radial-gradient(
+                    circle at 15% 20%,
+                    rgba(184,115,51,0.22),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 85% 80%,
+                    rgba(120,53,15,0.28),
+                    transparent 30%
+                ),
+                #1c1410;
+
+            display:flex;
+            justify-content:center;
+            align-items:center;
+
+            padding:30px;
+
+            color:#f8f1e7;
+        }
+
+        .admin-card{
+            width:440px;
+            padding:40px;
+            background:rgba(45,30,23,0.94);
+            border:1px solid rgba(205,133,63,0.28);
+            border-radius:24px;
+            text-align:center;
+            box-shadow:
+                0 25px 70px rgba(0,0,0,0.55),
+                0 0 35px rgba(184,115,51,0.10);
+        }
+
+        /* RESTRICTED PAGE */
+        .restricted-alert{
+            color:#ff6b6b;
+            font-size:20px;
+            font-weight:700;
+            letter-spacing:1px;
+            margin-bottom:25px;
+            padding:12px 15px;
+            border:1px solid rgba(220,80,80,0.40);
+            background:rgba(180,50,50,0.10);
+            border-radius:10px;
+            box-shadow:
+                0 0 18px rgba(220,80,80,0.08);
+        }
+
+        /* ERROR MESSAGE */
+        .error{
+            background:rgba(180,50,50,0.12);
+            border:1px solid rgba(220,80,80,0.45);
+            color:#ff8f8f;
+            padding:13px 15px;
+            border-radius:10px;
+            font-size:13px;
+            margin-bottom:20px;
+            line-height:1.5;
+        }
+
+        .icon{
+            font-size:52px;
+            margin-bottom:18px;
+        }
+
+        .title{
+            font-size:27px;
+            font-weight:700;
+            color:#f5e6d3;
+            margin-bottom:12px;
+        }
+
+        .message{
+            font-size:14px;
+            color:#c9a98b;
+            line-height:1.6;
+            margin-bottom:30px;
+        }
+
+        /* BUTTONS */
+        .yes-btn,
+        .no-btn{
+            display:block;
+            width:100%;
+            padding:14px;
+            border-radius:12px;
+            text-decoration:none;
+            font-size:15px;
+            font-weight:600;
+            transition:0.3s ease;
+        }
+
+        .yes-btn{
+            background:linear-gradient(
+                135deg,
+                #b87333,
+                #d8893f
+            );
+
+            color:#fffaf3;
+            margin-bottom:12px;
+            box-shadow:
+                0 8px 25px rgba(184,115,51,0.25);
+        }
+
+        .yes-btn:hover{
+            transform:translateY(-2px);
+            box-shadow:
+                0 12px 30px rgba(184,115,51,0.35);
+        }
+
+        .no-btn{
+            border:1px solid rgba(205,133,63,0.30);
+            color:#c9a98b;
+            background:transparent;
+        }
+
+        .no-btn:hover{
+            background:rgba(184,115,51,0.10);
+            color:#e09a52;
+        }
+
+        .back-btn{
+    display:block;
+    margin-top:18px;
+    color:#c9a98b;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+    transition:0.3s ease;
+}
+
+.back-btn:hover{
+    color:#e09a52;
+}
+        @media(max-width:520px){
+
+            body{
+                padding:18px;
+            }
+
+            .admin-card{
+                width:100%;
+                padding:30px 22px;
+            }
+
+            .title{
+               font-size:24px;
+            }
+            .restricted-alert{
+                font-size:18px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+<!-- Browser Alert: Page Open Aagumbothu Mattum -->
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.has("denied")) {
+        alert("⚠️ RESTRICTED PAGE");
+    }
+</script>
+
+<div class="admin-card">
+
+    <!-- Restricted Page Warning -->
+    <div class="restricted-alert">
+        ⚠️ RESTRICTED PAGE
+    </div>
+
+    <!-- Admin Icon -->
+    <div class="icon">
+        🛡️
+    </div>
+
+    <!-- Title -->
+    <div class="title">
+        Admin Access
+    </div>
+
+    <!-- Message -->
+    <div class="message">
+        Are you an administrator?
+        <br>
+        Admin access is restricted to authorized users only.
+    </div>
+
+    <!-- Error Message -->
+    {% if error %}
+        <div class="error">
+            ⚠️ {{ error }}
+        </div>
+    {% endif %}
+
+    <!-- YES -->
+    <a href="/admin-password" class="yes-btn">
+        ✅ Yes, I am an admin
+    </a>
+
+    <!-- NO -->
+    <a href="/admin?denied=1" class="no-btn">
+        ❌ No
+    </a>
+
+    <a href="/home" class="back-btn">
+    ← Back to Home
+</a>
+
+</div>
+
+</body>
+</html>
