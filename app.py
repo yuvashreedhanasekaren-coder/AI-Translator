@@ -109,7 +109,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = "yuvashreesince2004@gmail.com"
-app.config['MAIL_PASSWORD'] = "nkurdfvkebqrmzqs"
+app.config['MAIL_PASSWORD'] = "abwkxjhrzezwdqom"
 app.config['MAIL_DEFAULT_SENDER'] = "yuvashreesince2004@gmail.com"
 
 mail = Mail(app)
@@ -1065,15 +1065,31 @@ def admin_dashboard():
 
     db = get_db()
 
-    users = db.execute("""
-        SELECT id, username, email, purpose, is_verified
-        FROM users
-        ORDER BY id DESC
-    """).fetchall()
+    search = request.args.get("search", "").strip()
+
+    if search:
+        keyword = f"%{search}%"
+
+        users = db.execute("""
+            SELECT id, username, email, purpose, is_verified
+            FROM users
+            WHERE username LIKE ?
+               OR email LIKE ?
+               OR purpose LIKE ?
+            ORDER BY id DESC
+        """, (keyword, keyword, keyword)).fetchall()
+
+    else:
+        users = db.execute("""
+            SELECT id, username, email, purpose, is_verified
+            FROM users
+            ORDER BY id DESC
+        """).fetchall()
 
     return render_template(
         "admin_dashboard.html",
-        users=users
+        users=users,
+        search=search
     )
 
 # ---------- ADMIN ACCESS ----------

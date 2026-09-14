@@ -60,6 +60,49 @@
             margin-top:5px;
         }
 
+        .search-form{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+.search-form input{
+    flex:1;
+    padding:12px 15px;
+    border:1px solid rgba(205,133,63,0.30);
+    border-radius:10px;
+    background:#241914;
+    color:#f8f1e7;
+    outline:none;
+    font-size:14px;
+}
+
+.search-form input::placeholder{
+    color:#9f8874;
+}
+
+.search-form input:focus{
+    border-color:#b87333;
+    box-shadow:0 0 0 3px rgba(184,115,51,0.08);
+}
+
+.search-form button{
+    padding:12px 20px;
+    border:none;
+    border-radius:10px;
+    background:#b87333;
+    color:#fff;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s ease;
+}
+
+.search-form button:hover{
+    background:#d08a45;
+    transform:translateY(-1px);
+}
+      
         .back-btn{
             padding:11px 18px;
 
@@ -214,12 +257,22 @@
 
         <div>
             <div class="title">
-                🛡️ Admin Dashboard
-            </div>
+    🛡️ Admin Dashboard
+</div>
 
-            <div class="subtitle">
-                Manage registered users
-            </div>
+<div class="subtitle">
+    Manage registered users
+</div>
+
+<form method="GET" action="/admin-dashboard" class="search-form">
+    <input
+        type="text"
+        name="search"
+        value="{{ search or '' }}"
+        placeholder="🔍 Search users..."
+    >
+    <button type="submit">Search</button>
+</form>
         </div>
 
         <a href="/home" class="back-btn">
