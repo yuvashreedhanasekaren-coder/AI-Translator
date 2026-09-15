@@ -229,6 +229,11 @@
             font-size:14px;
         }
 
+        .status.not-verified{
+    background:rgba(143,48,40,0.12);
+    color:#e58b82;
+}
+
         @media(max-width:700px){
 
             body{
@@ -326,9 +331,11 @@
                     </td>
 
                     <td>
-                        <span class="status">
-                            Verified
-                        </span>
+                        {% if user["is_verified"] == 1 %}
+    <span class="status verified">Verified</span>
+{% else %}
+    <span class="status not-verified">Not Verified</span>
+{% endif %}
                     </td>
 
                     <td>

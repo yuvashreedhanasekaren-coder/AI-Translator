@@ -193,6 +193,9 @@ def verify_otp():
 
     email = request.args.get("email")
 
+    if request.args.get("skip") == "1":
+        return redirect(url_for("login"))
+
     if request.method == "POST":
 
         entered_otp = request.form["otp"]

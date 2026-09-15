@@ -72,6 +72,21 @@ button:hover{
     box-shadow:0 0 15px rgba(255,255,255,0.7);
 }
 
+.skip-btn{
+    display:block;
+    margin-top:12px;
+    color:white;
+    text-decoration:none;
+    font-size:14px;
+    opacity:0.85;
+    transition:0.3s;
+}
+
+.skip-btn:hover{
+    opacity:1;
+    text-decoration:underline;
+}
+
 /* Error */
 .error{
     color:#ffdddd;
@@ -90,9 +105,13 @@ button:hover{
     <h2>🔓 Verify Your New Account</h2>
 
     <form method="POST">
-        <input type="text" name="otp" placeholder="Enter OTP" required>
-        <button type="submit">Verify OTP</button>
-    </form>
+    <input type="text" name="otp" placeholder="Enter OTP" required>
+    <button type="submit">Verify OTP</button>
+</form>
+
+<a href="/verify_otp?email={{ request.args.get('email') }}&skip=1" class="skip-btn">
+    Skip for now
+</a>
 
     {% if error %}
         <div class="error">{{ error }}</div>
