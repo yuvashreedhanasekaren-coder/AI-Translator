@@ -188,6 +188,7 @@ def register():
 
     return render_template("register.html")
 
+#  --------------- verify OTP ----------------
 @app.route("/verify_otp", methods=["GET","POST"])
 def verify_otp():
 
@@ -1112,6 +1113,27 @@ def admin_dashboard():
         users=users,
         search=search
     )
+
+# ----------- Delete user ---------------
+@app.route("/delete-user/<int:user_id>", methods=["POST"])
+def delete_user(user_id):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if not session.get("is_admin"):
+        return redirect(url_for("admin"))
+
+    db = get_db()
+
+    db.execute(
+        "DELETE FROM users WHERE id=?",
+        (user_id,)
+    )
+
+    db.commit()
+
+    return redirect(url_for("admin_dashboard"))
 
 # ---------- ADMIN ACCESS ----------
 @app.route("/admin")
