@@ -174,7 +174,9 @@ body{
 
     <div class="profile-menu" id="profileMenu">
         <a href="/profile">👤 View Details</a>
+        {% if session.get("is_admin") %}
         <a href="/admin">🛡️ Admin</a>
+        {% endif %}
         <a href="/logout">🚪 Logout</a>
     </div>
 

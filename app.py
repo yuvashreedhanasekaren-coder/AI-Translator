@@ -84,6 +84,7 @@ def init_db():
         password TEXT,
         purpose TEXT,
         is_verified INTEGER DEFAULT 0,
+        is_admin INTEGER DEFAULT 0,
         otp TEXT
     )
     """)
@@ -91,6 +92,12 @@ def init_db():
     # Add purpose column to existing databases
     try:
         cursor.execute("ALTER TABLE users ADD COLUMN purpose TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    # Add is_admin column to existing databases
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0")
     except sqlite3.OperationalError:
         pass
 
@@ -238,6 +245,7 @@ def login():
         # ✅ ADD THIS
         session["user_id"] = user["id"]
         session["username"] = user["username"]
+        session["is_admin"] = bool(user["is_admin"])
 
         return redirect(url_for("home"))
 
@@ -1034,6 +1042,16 @@ def admin_password():
 
     if "user_id" not in session:
         return redirect(url_for("login"))
+
+    db = get_db()
+
+    user = db.execute(
+        "SELECT is_admin FROM users WHERE id=?",
+        (session["user_id"],)
+    ).fetchone()
+
+    if not user or not user["is_admin"]:
+        return redirect(url_for("admin", denied=1))
 
     if request.method == "POST":
 
