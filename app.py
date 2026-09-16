@@ -79,12 +79,13 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE,
-        email TEXT UNIQUE,
+        username TEXT,
+        email TEXT,
         password TEXT,
         purpose TEXT,
         is_verified INTEGER DEFAULT 0,
         is_admin INTEGER DEFAULT 0,
+        is_deleted INTEGER DEFAULT 0,
         otp TEXT
     )
     """)
@@ -100,6 +101,62 @@ def init_db():
         cursor.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0")
     except sqlite3.OperationalError:
         pass
+
+    # Add is_deleted column to existing databases
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN is_deleted INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+
+    # Rebuild users table to allow deleted email/username reuse
+    cursor.execute("""
+        SELECT sql
+        FROM sqlite_master
+        WHERE type='table' AND name='users'
+    """)
+
+    users_table_sql = cursor.fetchone()[0] or ""
+
+    if "username TEXT UNIQUE" in users_table_sql or "email TEXT UNIQUE" in users_table_sql:
+
+        cursor.execute("""
+            CREATE TABLE users_new(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT,
+                email TEXT,
+                password TEXT,
+                purpose TEXT,
+                is_verified INTEGER DEFAULT 0,
+                is_admin INTEGER DEFAULT 0,
+                is_deleted INTEGER DEFAULT 0,
+                otp TEXT
+            )
+        """)
+
+        cursor.execute("""
+            INSERT INTO users_new
+            (id, username, email, password, purpose,
+            is_verified, is_admin, is_deleted, otp)
+            SELECT id, username, email, password, purpose,
+                is_verified, is_admin, is_deleted, otp
+            FROM users
+        """)
+
+        cursor.execute("DROP TABLE users")
+        cursor.execute("ALTER TABLE users_new RENAME TO users")
+
+    # Allow only active users to have unique email and username
+    cursor.execute("""
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_users_active_email
+        ON users(email)
+        WHERE is_deleted = 0
+    """)
+
+    cursor.execute("""
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_users_active_username
+        ON users(username)
+        WHERE is_deleted = 0
+    """)    
 
     conn.commit()
     conn.close()
@@ -142,7 +199,7 @@ Thank you.
     except Exception as e:
         print("Mail sending error:", e)
 
-# ---------- REGISTER ----------
+# ---------- ISTER ----------
 @app.route("/")
 def register_page():
     return render_template("register.html")
@@ -158,11 +215,18 @@ def register():
 
         db = get_db()
 
-        # Check existing user
+        # Check existing active user
         existing = db.execute(
-            "SELECT * FROM users WHERE email=? OR username=?",
+            """
+            SELECT * FROM users
+            WHERE (email=? OR username=?)
+            AND is_deleted=0
+            """,
             (email, username)
         ).fetchone()
+
+        if existing:        
+            return render_template("already_account.html")
 
         if existing:
             return render_template("already_account.html")
@@ -179,7 +243,6 @@ def register():
     purpose,
     otp
 ))
-
         db.commit()
 
         send_otp_email(email, otp)
@@ -222,38 +285,6 @@ def verify_otp():
             return "Wrong OTP!"
 
     return render_template("verify_otp.html")
-
-# ---------- LOGIN ----------
-@app.route("/login", methods=["GET","POST"])
-def login():
-    if request.method == "POST":
-
-        username = request.form["username"]
-        password = request.form["password"]
-
-        db = get_db()
-        user = db.execute(
-            "SELECT * FROM users WHERE username=?",
-            (username,)
-        ).fetchone()
-
-        if not user:
-            return render_template("login.html", error="User not found")
-
-        if user["is_verified"] == 0:
-            return render_template("login.html", error="Please verify email first")
-
-        if not check_password_hash(user["password"], password):
-            return render_template("login.html", error="Wrong password")
-
-        # ✅ ADD THIS
-        session["user_id"] = user["id"]
-        session["username"] = user["username"]
-        session["is_admin"] = bool(user["is_admin"])
-
-        return redirect(url_for("home"))
-
-    return render_template("login.html")
 
 # ---------- LOGOUT ----------
 @app.route("/logout")
@@ -1127,7 +1158,7 @@ def delete_user(user_id):
     db = get_db()
 
     db.execute(
-        "DELETE FROM users WHERE id=?",
+        "UPDATE users SET is_deleted=1 WHERE id=?",
         (user_id,)
     )
 
