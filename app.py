@@ -286,6 +286,60 @@ def verify_otp():
 
     return render_template("verify_otp.html")
 
+# ---------- LOGIN ----------
+@app.route("/login", methods=["GET","POST"])
+def login():
+    if request.method == "POST":
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        db = get_db()
+
+        # Check active user first
+        user = db.execute(
+            """
+            SELECT * FROM users
+            WHERE username=? AND is_deleted=0
+            """,
+            (username,)
+        ).fetchone()
+
+        if not user:
+            # Check whether this username belongs to a deleted account
+            deleted_user = db.execute(
+                """
+                SELECT * FROM users
+                WHERE username=? AND is_deleted=1
+                """,
+                (username,)
+            ).fetchone()
+
+            if deleted_user:
+                return render_template(
+                    "login.html",
+                    error="Your account has been deleted. Please register again to create a new account."
+                )
+
+            return render_template(
+                "login.html",
+                error="User not found"
+            )
+
+        if not check_password_hash(user["password"], password):
+            return render_template(
+                "login.html",
+                error="Wrong password"
+            )
+
+        session["user_id"] = user["id"]
+        session["username"] = user["username"]
+        session["is_admin"] = bool(user["is_admin"])
+
+        return redirect(url_for("home"))
+
+    return render_template("login.html")
+
 # ---------- LOGOUT ----------
 @app.route("/logout")
 def logout():
