@@ -1204,6 +1204,7 @@ def admin_dashboard():
     )
 
 # ---------- ADMIN USER DETAILS ----------
+
 @app.route("/admin-user/<int:user_id>")
 def admin_user_details(user_id):
 
@@ -1216,7 +1217,7 @@ def admin_user_details(user_id):
     db = get_db()
 
     user = db.execute("""
-        SELECT id, username, email, purpose, is_verified
+        SELECT id, username, email, purpose, is_verified, is_admin
         FROM users
         WHERE id=? AND is_deleted=0
     """, (user_id,)).fetchone()
