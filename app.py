@@ -1178,7 +1178,7 @@ def admin_dashboard():
         keyword = f"%{search}%"
 
         users = db.execute("""
-            SELECT id, username, email, purpose, is_verified
+            SELECT id, username, email, purpose, is_verified, is_admin
             FROM users
             WHERE is_deleted=0
                 AND (
@@ -1191,7 +1191,7 @@ def admin_dashboard():
 
     else:   
         users = db.execute("""
-            SELECT id, username, email, purpose, is_verified
+            SELECT id, username, email, purpose, is_verified, is_admin 
             FROM users
             WHERE is_deleted=0
             ORDER BY id DESC
@@ -1264,6 +1264,15 @@ def delete_user(user_id):
         return redirect(url_for("admin"))
 
     db = get_db()
+
+    # Prevent deleting an admin account
+    target_user = db.execute(
+        "SELECT is_admin FROM users WHERE id=? AND is_deleted=0",
+        (user_id,)
+    ).fetchone()
+
+    if target_user and target_user["is_admin"] == 1:
+        return redirect(url_for("admin_dashboard"))
 
     db.execute(
         "UPDATE users SET is_deleted=1 WHERE id=?",

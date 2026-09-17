@@ -450,7 +450,6 @@
 
         </div>
 
-
         <!-- Top Buttons -->
 
         <div class="top-buttons">
@@ -462,7 +461,6 @@
                 ← Dashboard
             </a>
 
-
             <a
                 href="{{ url_for('deleted_accounts') }}"
                 class="back-btn"
@@ -473,7 +471,6 @@
         </div>
 
     </div>
-
 
 
     <!-- Users Card -->
@@ -528,20 +525,27 @@
 
                 <tr>
 
-
-                    <!-- ID -->
-
-                    <td>
-                        {{ user['id'] }}
-                    </td>
-
-
+                   <!-- ID -->
+<td>
+    {% if user['is_admin'] == 1 %}
+        ⭐{{ user['id'] }}
+    {% else %}
+        {{ user['id'] }}
+    {% endif %}
+</td>
                     <!-- Full Name -->
-
+                            
                     <td>
-                        {{ user['username'] }}
-                    </td>
 
+    {{ user['username'] }}
+
+    {% if user['is_admin'] == 1 %}
+        <span style="color:#e09a52; font-weight:600;">
+            (Admin)
+        </span>
+    {% endif %}
+
+</td>
 
                     <!-- Email -->
 
@@ -597,26 +601,35 @@
                             👁️
                         </a>
 
+                        {% if user['is_admin'] == 1 %}
 
-                        <!-- Delete User -->
+    <!-- Admin: Delete disabled -->
+    <span style="color:#9f8874; font-size:13px;">
+        Protected
+    </span>
 
-                        <form
-                            method="POST"
-                            action="/delete-user/{{ user['id'] }}"
-                            id="deleteForm{{ user['id'] }}"
-                            style="display:inline;"
-                        >
+{% else %}
 
-                            <button
-                                type="button"
-                                class="delete-btn"
-                                onclick="showDeleteConfirmation(
-                                    '{{ user['username'] }}',
-                                    this.form
-                                )"
-                            >
-                                🗑️ Delete
-                            </button>
+    <!-- Delete User -->
+    <form
+        method="POST"
+        action="/delete-user/{{ user['id'] }}"
+        id="deleteForm{{ user['id'] }}"
+        style="display:inline;"
+    >
+        <button
+            type="button"
+            class="delete-btn"
+            onclick="showDeleteConfirmation(
+                '{{ user['username'] }}',
+                this.form
+            )"
+        >
+            🗑️ Delete
+        </button>
+    </form>
+
+{% endif %}
 
                         </form>
 
