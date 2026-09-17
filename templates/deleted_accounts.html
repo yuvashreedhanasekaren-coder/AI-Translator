@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Deleted Accounts</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 18px;
+            background: #6366f1;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #6366f1;
+            color: white;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="{{ url_for('admin_dashboard') }}" class="back-btn">
+        ← Back to Admin Dashboard
+    </a>
+
+    <h1>Deleted Accounts</h1>
+
+    {% if users %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Purpose</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for user in users %}
+
+            <tr>
+                <td>{{ user["id"] }}</td>
+                <td>{{ user["username"] }}</td>
+                <td>{{ user["email"] }}</td>
+                <td>{{ user["purpose"] }}</td>
+
+                <td>
+                    {% if user["is_verified"] == 1 %}
+                        Verified
+                    {% else %}
+                        Not Verified
+                    {% endif %}
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+    </table>
+
+    {% else %}
+
+        <div class="empty">
+            No deleted accounts found.
+        </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>

@@ -1,9 +1,15 @@
 <!DOCTYPE html>
+
 <html>
+
 <head>
+
     <title>Admin Dashboard - AI Translator</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
 
     <style>
 
@@ -23,15 +29,16 @@
                     rgba(184,115,51,0.20),
                     transparent 30%
                 ),
+
                 radial-gradient(
                     circle at 90% 85%,
                     rgba(120,53,15,0.25),
                     transparent 30%
                 ),
+
                 #1c1410;
 
             color:#f8f1e7;
-
             padding:35px;
         }
 
@@ -44,7 +51,6 @@
             display:flex;
             justify-content:space-between;
             align-items:center;
-
             margin-bottom:30px;
         }
 
@@ -61,48 +67,58 @@
         }
 
         .search-form{
-    display:flex;
-    gap:10px;
-    margin-top:20px;
-}
+            display:flex;
+            gap:10px;
+            margin-top:20px;
+        }
 
-.search-form input{
-    flex:1;
-    padding:12px 15px;
-    border:1px solid rgba(205,133,63,0.30);
-    border-radius:10px;
-    background:#241914;
-    color:#f8f1e7;
-    outline:none;
-    font-size:14px;
-}
+        .search-form input{
+            flex:1;
+            padding:12px 15px;
 
-.search-form input::placeholder{
-    color:#9f8874;
-}
+            border:1px solid rgba(205,133,63,0.30);
+            border-radius:10px;
 
-.search-form input:focus{
-    border-color:#b87333;
-    box-shadow:0 0 0 3px rgba(184,115,51,0.08);
-}
+            background:#241914;
+            color:#f8f1e7;
 
-.search-form button{
-    padding:12px 20px;
-    border:none;
-    border-radius:10px;
-    background:#b87333;
-    color:#fff;
-    font-size:14px;
-    font-weight:600;
-    cursor:pointer;
-    transition:0.3s ease;
-}
+            outline:none;
+            font-size:14px;
+        }
 
-.search-form button:hover{
-    background:#d08a45;
-    transform:translateY(-1px);
-}
-      
+        .search-form input::placeholder{
+            color:#9f8874;
+        }
+
+        .search-form input:focus{
+            border-color:#b87333;
+
+            box-shadow:
+                0 0 0 3px rgba(184,115,51,0.08);
+        }
+
+        .search-form button{
+            padding:12px 20px;
+
+            border:none;
+            border-radius:10px;
+
+            background:#b87333;
+            color:#fff;
+
+            font-size:14px;
+            font-weight:600;
+
+            cursor:pointer;
+
+            transition:0.3s ease;
+        }
+
+        .search-form button:hover{
+            background:#d08a45;
+            transform:translateY(-1px);
+        }
+
         .back-btn{
             padding:11px 18px;
 
@@ -123,11 +139,19 @@
             color:#e09a52;
         }
 
+        /* Dashboard and Deleted Accounts buttons */
+
+        .top-buttons{
+            display:flex;
+            flex-direction:column;
+            align-items:flex-end;
+            gap:10px;
+        }
+
         .users-card{
             background:rgba(45,30,23,0.94);
 
             border:1px solid rgba(205,133,63,0.28);
-
             border-radius:22px;
 
             padding:25px;
@@ -156,11 +180,9 @@
 
         th{
             text-align:left;
-
             padding:14px;
 
             background:#302019;
-
             color:#c9a98b;
 
             font-size:13px;
@@ -172,7 +194,6 @@
             border-bottom:1px solid rgba(205,133,63,0.12);
 
             color:#f8f1e7;
-
             font-size:14px;
         }
 
@@ -191,7 +212,6 @@
             font-weight:600;
 
             background:rgba(72,160,100,0.12);
-
             color:#8fd3a5;
         }
 
@@ -199,11 +219,9 @@
             padding:8px 13px;
 
             border:none;
-
             border-radius:8px;
 
             background:#8f3028;
-
             color:white;
 
             font-size:12px;
@@ -225,14 +243,144 @@
             padding:35px;
 
             color:#c9a98b;
-
             font-size:14px;
         }
 
         .status.not-verified{
-    background:rgba(143,48,40,0.12);
-    color:#e58b82;
-}
+            background:rgba(143,48,40,0.12);
+            color:#e58b82;
+        }
+
+
+        /* =========================================
+           DELETE CONFIRMATION MODAL
+           ========================================= */
+
+        .delete-modal{
+            display:none;
+
+            position:fixed;
+            inset:0;
+
+            z-index:9999;
+
+            align-items:center;
+            justify-content:center;
+
+            background:rgba(0,0,0,0.65);
+
+            backdrop-filter:blur(4px);
+        }
+
+        .delete-box{
+            width:90%;
+            max-width:420px;
+
+            background:#2d1e17;
+
+            border:1px solid rgba(205,133,63,0.35);
+
+            border-radius:18px;
+
+            padding:28px;
+
+            text-align:center;
+
+            box-shadow:
+                0 25px 70px rgba(0,0,0,0.60),
+                0 0 35px rgba(184,115,51,0.12);
+
+            animation:deleteModalIn 0.2s ease;
+        }
+
+        .delete-title{
+            font-size:21px;
+            font-weight:600;
+
+            color:#f5e6d3;
+
+            margin-bottom:14px;
+        }
+
+        .delete-message{
+            color:#c9a98b;
+
+            font-size:14px;
+
+            line-height:1.7;
+        }
+
+        .delete-message strong{
+            color:#e09a52;
+            font-weight:600;
+        }
+
+        .delete-actions{
+            display:flex;
+
+            justify-content:center;
+
+            gap:12px;
+
+            margin-top:25px;
+        }
+
+        .cancel-delete,
+        .confirm-delete{
+            padding:10px 20px;
+
+            border:none;
+            border-radius:9px;
+
+            font-family:'Poppins',sans-serif;
+
+            font-size:13px;
+            font-weight:600;
+
+            cursor:pointer;
+
+            transition:0.25s ease;
+        }
+
+        .cancel-delete{
+            background:rgba(201,169,139,0.10);
+
+            border:1px solid rgba(201,169,139,0.25);
+
+            color:#c9a98b;
+        }
+
+        .cancel-delete:hover{
+            background:rgba(201,169,139,0.18);
+
+            color:#f5e6d3;
+        }
+
+        .confirm-delete{
+            background:#8f3028;
+            color:white;
+        }
+
+        .confirm-delete:hover{
+            background:#b63d32;
+
+            transform:translateY(-1px);
+        }
+
+        @keyframes deleteModalIn{
+
+            from{
+                opacity:0;
+                transform:scale(0.94);
+            }
+
+            to{
+                opacity:1;
+                transform:scale(1);
+            }
+
+        }
+
 
         @media(max-width:700px){
 
@@ -242,50 +390,93 @@
 
             .header{
                 flex-direction:column;
+
                 align-items:flex-start;
+
                 gap:18px;
             }
 
             .title{
                 font-size:25px;
             }
+
         }
 
     </style>
+
 </head>
+
 
 <body>
 
 <div class="dashboard">
 
+
+    <!-- Header -->
+
     <div class="header">
 
         <div>
+
             <div class="title">
-    🛡️ Admin Dashboard
-</div>
+                🛡️ Admin Dashboard
+            </div>
 
-<div class="subtitle">
-    Manage registered users
-</div>
+            <div class="subtitle">
+                Manage registered users
+            </div>
 
-<form method="GET" action="/admin-dashboard" class="search-form">
-    <input
-        type="text"
-        name="search"
-        value="{{ search or '' }}"
-        placeholder="🔍 Search users..."
-    >
-    <button type="submit">Search</button>
-</form>
+
+            <!-- Search -->
+
+            <form
+                method="GET"
+                action="/admin-dashboard"
+                class="search-form"
+            >
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search or '' }}"
+                    placeholder="🔍 Search users..."
+                >
+
+                <button type="submit">
+                    Search
+                </button>
+
+            </form>
+
         </div>
 
-        <a href="/home" class="back-btn">
-            ← Dashboard
-        </a>
+
+        <!-- Top Buttons -->
+
+        <div class="top-buttons">
+
+            <a
+                href="{{ url_for('admin') }}"
+                class="back-btn"
+            >
+                ← Dashboard
+            </a>
+
+
+            <a
+                href="{{ url_for('deleted_accounts') }}"
+                class="back-btn"
+            >
+                🗑️ Deleted Accounts
+            </a>
+
+        </div>
 
     </div>
 
+
+
+    <!-- Users Card -->
 
     <div class="users-card">
 
@@ -293,20 +484,43 @@
             👥 Registered Users
         </div>
 
+
         {% if users %}
 
         <table>
 
             <thead>
+
                 <tr>
-                    <th>ID</th>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Purpose</th>
-                    <th>Status</th>
-                    <th>Action</th>
+
+                    <th>
+                        ID
+                    </th>
+
+                    <th>
+                        Full Name
+                    </th>
+
+                    <th>
+                        Email
+                    </th>
+
+                    <th>
+                        Purpose
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
                 </tr>
+
             </thead>
+
 
             <tbody>
 
@@ -314,41 +528,99 @@
 
                 <tr>
 
+
+                    <!-- ID -->
+
                     <td>
                         {{ user['id'] }}
                     </td>
+
+
+                    <!-- Full Name -->
 
                     <td>
                         {{ user['username'] }}
                     </td>
 
+
+                    <!-- Email -->
+
                     <td>
                         {{ user['email'] }}
                     </td>
+
+
+                    <!-- Purpose -->
 
                     <td>
                         {{ user['purpose'] }}
                     </td>
 
-                    <td>
-                        {% if user["is_verified"] == 1 %}
-    <span class="status verified">Verified</span>
-{% else %}
-    <span class="status not-verified">Not Verified</span>
-{% endif %}
-                    </td>
+
+                    <!-- Verification Status -->
 
                     <td>
+
+                        {% if user["is_verified"] == 1 %}
+
+                            <span class="status verified">
+                                Verified
+                            </span>
+
+                        {% else %}
+
+                            <span class="status not-verified">
+                                Not Verified
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- Action -->
+
+                    <td>
+
+
+                        <!-- View User Details -->
+
+                        <a
+                            href="{{ url_for('admin_user_details', user_id=user['id']) }}"
+                            title="View Details"
+                            style="
+                                text-decoration:none;
+                                font-size:18px;
+                                margin-right:10px;
+                            "
+                        >
+                            👁️
+                        </a>
+
+
+                        <!-- Delete User -->
+
                         <form
-    method="POST"
-    action="/delete-user/{{ user['id'] }}"
-    style="display:inline;"
-    onsubmit="return confirm('Are you sure you want to delete this user?');"
->
-    <button type="submit" class="delete-btn">
-        🗑️ Delete
-    </button>
-</form>
+                            method="POST"
+                            action="/delete-user/{{ user['id'] }}"
+                            id="deleteForm{{ user['id'] }}"
+                            style="display:inline;"
+                        >
+
+                            <button
+                                type="button"
+                                class="delete-btn"
+                                onclick="showDeleteConfirmation(
+                                    '{{ user['username'] }}',
+                                    this.form
+                                )"
+                            >
+                                🗑️ Delete
+                            </button>
+
+                        </form>
+
+
                     </td>
 
                 </tr>
@@ -358,6 +630,7 @@
             </tbody>
 
         </table>
+
 
         {% else %}
 
@@ -371,5 +644,66 @@
 
 </div>
 
+<div
+    id="deleteModal"
+    class="delete-modal"
+>
+
+    <div class="delete-box">
+
+
+        <div class="delete-title">
+
+            ⚠️ Delete User?
+
+        </div>
+
+
+        <div class="delete-message">
+
+            Are you sure you want to delete
+
+            <strong id="deleteUserName"></strong>'s account?
+
+        </div>
+
+
+        <div class="delete-actions">
+
+
+            <!-- Cancel -->
+
+            <button
+                type="button"
+                class="cancel-delete"
+                onclick="closeDeleteConfirmation()"
+            >
+                Cancel
+            </button>
+
+
+            <!-- Confirm Delete -->
+
+            <button
+                type="button"
+                class="confirm-delete"
+                onclick="confirmDelete()"
+            >
+                Delete
+            </button>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Delete Confirmation JavaScript -->
+
+<script src="{{ url_for('static', filename='delete_confirm.js') }}"></script>
+
+
 </body>
+
 </html>

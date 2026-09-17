@@ -1180,23 +1180,77 @@ def admin_dashboard():
         users = db.execute("""
             SELECT id, username, email, purpose, is_verified
             FROM users
-            WHERE username LIKE ?
-               OR email LIKE ?
-               OR purpose LIKE ?
+            WHERE is_deleted=0
+                AND (
+                    username LIKE ?
+                    OR email LIKE ?
+                    OR purpose LIKE ?
+                )
             ORDER BY id DESC
         """, (keyword, keyword, keyword)).fetchall()
 
-    else:
+    else:   
         users = db.execute("""
             SELECT id, username, email, purpose, is_verified
             FROM users
+            WHERE is_deleted=0
             ORDER BY id DESC
-        """).fetchall()
+    """).fetchall()
 
     return render_template(
         "admin_dashboard.html",
         users=users,
         search=search
+    )
+
+# ---------- ADMIN USER DETAILS ----------
+@app.route("/admin-user/<int:user_id>")
+def admin_user_details(user_id):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if not session.get("is_admin"):
+        return redirect(url_for("admin"))
+
+    db = get_db()
+
+    user = db.execute("""
+        SELECT id, username, email, purpose, is_verified
+        FROM users
+        WHERE id=? AND is_deleted=0
+    """, (user_id,)).fetchone()
+
+    if not user:
+        return redirect(url_for("admin_dashboard"))
+
+    return render_template(
+        "admin_user_details.html",
+        user=user
+    )
+
+# ---------- DELETED ACCOUNTS ----------
+@app.route("/deleted-accounts")
+def deleted_accounts():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if not session.get("is_admin"):
+        return redirect(url_for("admin"))
+
+    db = get_db()
+
+    deleted_users = db.execute("""
+        SELECT id, username, email, purpose, is_verified
+        FROM users
+        WHERE is_deleted=1
+        ORDER BY id DESC
+    """).fetchall()
+
+    return render_template(
+        "deleted_accounts.html",
+        users=deleted_users
     )
 
 # ----------- Delete user ---------------
