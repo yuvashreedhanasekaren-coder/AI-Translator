@@ -1254,6 +1254,31 @@ def deleted_accounts():
         users=deleted_users
     )
 
+# ----------- Restore deleted user ---------------
+@app.route("/restore-user/<int:user_id>", methods=["POST"])
+def restore_user(user_id):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if not session.get("is_admin"):
+        return redirect(url_for("admin"))
+
+    db = get_db()
+
+    db.execute(
+        """
+        UPDATE users
+        SET is_deleted=0
+        WHERE id=? AND is_deleted=1
+        """,
+        (user_id,)
+    )
+
+    db.commit()
+
+    return redirect(url_for("deleted_accounts"))
+
 # ----------- Delete user ---------------
 @app.route("/delete-user/<int:user_id>", methods=["POST"])
 def delete_user(user_id):

@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Deleted Accounts</title>
 
     <style>
+
         body {
             font-family: Arial, sans-serif;
             background: #f5f7fb;
@@ -42,7 +45,8 @@
             overflow: hidden;
         }
 
-        th, td {
+        th,
+        td {
             padding: 14px;
             border-bottom: 1px solid #ddd;
             text-align: left;
@@ -53,71 +57,293 @@
             color: white;
         }
 
+        .restore-btn {
+            padding: 8px 14px;
+            background: #9f8874;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .restore-btn:hover {
+            background: #856f5d;
+        }
+
         .empty {
             text-align: center;
             padding: 30px;
             background: white;
             border-radius: 10px;
         }
+
+
+        /* Restore Confirmation Modal */
+
+        .restore-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .restore-box {
+            width: 400px;
+            background: white;
+            padding: 28px;
+            border-radius: 14px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.20);
+        }
+
+        .restore-box h2 {
+            margin-top: 0;
+            color: #4a3f35;
+        }
+
+        .restore-box p {
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .restore-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .cancel-restore {
+            padding: 9px 18px;
+            border: 1px solid #ccc;
+            background: white;
+            color: #555;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .cancel-restore:hover {
+            background: #f5f5f5;
+        }
+
+        .confirm-restore {
+            padding: 9px 18px;
+            border: none;
+            background: #9f8874;
+            color: white;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .confirm-restore:hover {
+            background: #856f5d;
+        }
+
     </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-    <a href="{{ url_for('admin_dashboard') }}" class="back-btn">
+
+    <a
+        href="{{ url_for('admin_dashboard') }}"
+        class="back-btn"
+    >
         ← Back to Admin Dashboard
     </a>
 
+
     <h1>Deleted Accounts</h1>
+
 
     {% if users %}
 
+
     <table>
+
         <thead>
+
             <tr>
+
                 <th>ID</th>
+
                 <th>Full Name</th>
+
                 <th>Email</th>
+
                 <th>Purpose</th>
+
                 <th>Status</th>
+
+                <th>Restore</th>
+
             </tr>
+
         </thead>
+
 
         <tbody>
 
+
             {% for user in users %}
 
+
             <tr>
-                <td>{{ user["id"] }}</td>
-                <td>{{ user["username"] }}</td>
-                <td>{{ user["email"] }}</td>
-                <td>{{ user["purpose"] }}</td>
+
 
                 <td>
-                    {% if user["is_verified"] == 1 %}
-                        Verified
-                    {% else %}
-                        Not Verified
-                    {% endif %}
+                    {{ user["id"] }}
                 </td>
+
+
+                <td>
+                    {{ user["username"] }}
+                </td>
+
+
+                <td>
+                    {{ user["email"] }}
+                </td>
+
+
+                <td>
+                    {{ user["purpose"] }}
+                </td>
+
+
+                <td>
+
+                    {% if user["is_verified"] == 1 %}
+
+                        Verified
+
+                    {% else %}
+
+                        Not Verified
+
+                    {% endif %}
+
+                </td>
+
+
+                <td>
+
+                    <form
+                        method="POST"
+                        action="/restore-user/{{ user['id'] }}"
+                        style="display:inline;"
+                    >
+
+                        <button
+                            type="button"
+                            class="restore-btn"
+                            onclick="showRestoreConfirmation(
+                                '{{ user['username'] }}',
+                                this.form
+                            )"
+                        >
+                            ♻️ Restore
+                        </button>
+
+                    </form>
+
+                </td>
+
+
             </tr>
+
 
             {% endfor %}
 
+
         </tbody>
+
     </table>
 
+
     {% else %}
+
 
         <div class="empty">
             No deleted accounts found.
         </div>
 
+
     {% endif %}
+
 
 </div>
 
+
+
+<!-- Restore Confirmation Modal -->
+
+<div
+    id="restoreModal"
+    class="restore-modal"
+>
+
+    <div class="restore-box">
+
+
+        <h2>
+            Restore Account
+        </h2>
+
+
+        <p>
+
+            Are you sure you want to restore
+            <strong id="restoreUserName"></strong>?
+
+        </p>
+
+
+        <div class="restore-actions">
+
+
+            <button
+                type="button"
+                class="cancel-restore"
+                onclick="closeRestoreConfirmation()"
+            >
+                Cancel
+            </button>
+
+
+            <button
+                type="button"
+                class="confirm-restore"
+                onclick="confirmRestore()"
+            >
+                ♻️ Restore
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<script
+    src="{{ url_for('static', filename='restore_confirm.js') }}"
+></script>
+
+
 </body>
+
 </html>
