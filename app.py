@@ -1223,7 +1223,7 @@ def admin_user_details(user_id):
     """, (user_id,)).fetchone()
 
     if not user:
-        return redirect(url_for("admin_dashboard"))
+        return redirect(url_for("admin_dashboa"))
 
     return render_template(
         "admin_user_details.html",
