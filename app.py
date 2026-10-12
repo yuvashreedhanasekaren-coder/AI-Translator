@@ -1,5 +1,7 @@
+from pydoc import text
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, session, g, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
+from deep_translator import GoogleTranslator, MyMemoryTranslator
 import os
 import sys
 import sqlite3
@@ -17,10 +19,15 @@ import whisper
 import torch
 from gtts import gTTS 
 import sounddevice as sd
-from PIL import Image
+from PIL import Image, ImageOps
 from flask_mail import Mail, Message
 from yt_dlp import YoutubeDL
-from deep_translator import GoogleTranslator
+from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+from openai import OpenAI
+
+load_dotenv()
+client = OpenAI()
 
 video_jobs = {}
 
@@ -427,55 +434,145 @@ def reset_password():
 
     return render_template("reset_password.html")
 
+
 # ---------- IMAGE OCR + TRANSLATION ----------
+
 @app.route("/image", methods=["GET", "POST"])
 def image_page():
-    if request.method == "POST":
-        file = request.files.get("image")
-        target_lang = request.form.get("target_lang", "ta")  # default Tamil
 
-        if not file or file.filename == "":
-            return render_template("image.html", error="No file selected")
+    if request.method == "GET":
+        return render_template("image.html")
 
-        path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
+    file = request.files.get("image")
+    target_lang = request.form.get("target_lang", "ta").strip().lower()
+
+    supported_languages = {
+        "ta": "Tamil",
+        "en": "English",
+        "te": "Telugu",
+        "kn": "Kannada"
+    }
+
+    # Validate output language
+    if target_lang not in supported_languages:
+        return render_template(
+            "image.html",
+            error="Please select a valid output language."
+        )
+
+    # Validate uploaded image
+    if not file or not file.filename:
+        return render_template(
+            "image.html",
+            error="Please select an image."
+        )
+
+    filename = secure_filename(file.filename)
+
+    if not filename:
+        return render_template(
+            "image.html",
+            error="Invalid image filename."
+        )
+
+    upload_folder = app.config["UPLOAD_FOLDER"]
+    os.makedirs(upload_folder, exist_ok=True)
+
+    path = os.path.join(upload_folder, filename)
+
+    try:
+        # Save the image
         file.save(path)
 
-        img = Image.open(path)
-        img_cv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-        gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
-        _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+        # Open image and correct its orientation
+        with Image.open(path) as original:
+            img = ImageOps.exif_transpose(original).convert("RGB")
 
-        # OCR (Input English + Hindi)
-        text = pytesseract.image_to_string(
+        # Convert to OpenCV format
+        img_cv = cv2.cvtColor(
+            np.array(img),
+            cv2.COLOR_RGB2BGR
+        )
+
+        # Grayscale preprocessing
+        gray = cv2.cvtColor(
+            img_cv,
+            cv2.COLOR_BGR2GRAY
+        )
+
+        # Enlarge smaller images
+        if gray.shape[0] < 1000:
+            gray = cv2.resize(
+                gray,
+                None,
+                fx=2,
+                fy=2,
+                interpolation=cv2.INTER_CUBIC
+            )
+
+        # Improve contrast
+        thresh = cv2.threshold(
+            gray,
+            0,
+            255,
+            cv2.THRESH_BINARY + cv2.THRESH_OTSU
+        )[1]
+
+        # OCR: English and Hindi
+        extracted_text = pytesseract.image_to_string(
             thresh,
             lang="eng+hin",
             config="--psm 6"
+        ).strip()
+
+        print("OCR extracted text:", repr(extracted_text))
+
+        if not extracted_text:
+            return render_template(
+                "image.html",
+                error=(
+                    "No English or Hindi text detected. "
+                    "Try a clearer image."
+                )
+            )
+
+        # Translate using the existing translation helper
+        translated = hybrid_translate(
+            extracted_text,
+            target_lang
         )
 
-        if not text.strip():
-            text = "No text detected."
+        print(
+            "Selected language:",
+            supported_languages[target_lang]
+        )
+        print("Translation result:", repr(translated))
 
-        try:
-            translated = GoogleTranslator(
-                source="auto",
-                target=target_lang
-            ).translate(text)
+        if not translated or translated == "Translation failed":
+            return render_template(
+                "image.html",
+                error=(
+                    "Translation failed. Please check the "
+                    "translation error in the terminal and try again."
+                )
+            )
 
-            print("Translation successful:", translated)
-
-        except Exception as e:
-            print("IMAGE TRANSLATION ERROR:", repr(e))
-            translated = "Translation service temporarily unavailable."
-
-        filename = os.path.basename(path)
-
+        # Render the result page
         return render_template(
             "output.html",
             translated=translated,
-            image_filename=filename
+            image_filename=filename,
+            extracted_text=extracted_text
         )
 
-    return render_template("image.html")
+    except Exception as e:
+        app.logger.exception("IMAGE OCR OR TRANSLATION FAILED")
+
+        return render_template(
+            "image.html",
+            error=f"Image translation failed: {str(e)}"
+        ), 500
+
 
 # ---------- SERVE UPLOADED FILE ----------
 @app.route('/uploads/<filename>')
@@ -825,56 +922,94 @@ def generate_voice():
 
     return jsonify({"audio_url": f"/uploads/{filename}"})
     
-# ----------------- text translation -------------------
+# ----------------- TEXT TRANSLATION -------------------
+
 import pyttsx3
 
 import argostranslate.package
 import argostranslate.translate
 
-# ----------------- OFFLINE TRANSLATE
+
+# ----------------- OFFLINE TRANSLATE -----------------
+
 def offline_translate(text, target_lang):
 
     installed_languages = argostranslate.translate.get_installed_languages()
 
-    # AUTO detect source
-    from_lang = None
+    # Find target language
     to_lang = None
 
     for lang in installed_languages:
         if lang.code == target_lang:
             to_lang = lang
+            break
 
-    # try all possible source languages
+    if not to_lang:
+        return None
+
+    # Try all installed languages as source
     for lang in installed_languages:
+
         try:
+
             translation = lang.get_translation(to_lang)
+
             if translation:
                 return translation.translate(text)
-        except:
+
+        except Exception:
             continue
 
     return None
 
-# -------------- HYBRID TRANSLATE(online + offline)
+# ----------------- HYBRID TRANSLATE -----------------
 def hybrid_translate(text, target_lang):
 
+    if not text:
+        return "Please enter some text."
+
+    language_names = {
+        "ta": "Tamil",
+        "hi": "Hindi",
+        "te": "Telugu",
+        "kn": "Kannada",
+        "ml": "Malayalam",
+        "en": "English"
+    }
+
+    target_language = language_names.get(target_lang)
+
+    if not target_language:
+        return "Unsupported target language."
+
     try:
-        translated = GoogleTranslator(
-            source="auto",
-            target=target_lang
-        ).translate(text)
+        response = client.responses.create(
+            model="gpt-5.6-luna",
+            input=f"""
+Translate the following text into {target_language}.
 
-        return translated
+Rules:
+- Return ONLY the translated text.
+- Do not explain anything.
+- Preserve the original meaning.
+- Do not add quotation marks.
 
-    except:
-        offline = offline_translate(text, target_lang)
+Text:
+{text}
+"""
+        )
 
-        if offline:
-            return offline
+        translated = response.output_text.strip()
 
-        return "Translation failed"
+        if translated:
+            return translated
 
-# ----------------- SENTENCE GENERATOR    
+    except Exception as e:
+        print("OpenAI Translation Error:", e)
+
+    return "Translation failed"
+
+# ----------------- SENTENCE GENERATOR -----------------
 
 def smart_example(word):
 
@@ -882,75 +1017,157 @@ def smart_example(word):
         return "No example available"
 
     patterns = [
+
         f"I said {word} to my friend.",
+
         f"She used the word {word} in a sentence.",
+
         f"They greeted me with {word}.",
+
         f"He didn't understand the meaning of {word}.",
+
         f"I often hear people say {word}."
+
     ]
 
     import random
+
     return random.choice(patterns)
+
+
+# ----------------- MULTILINGUAL EXAMPLE -----------------
 
 def smart_multilingual_example(word, target_lang):
 
+    if not word:
+        return "No example available"
+
     sentence = f"I said {word} to my friend."
 
-    translated_sentence = GoogleTranslator(
-        source="en",
-        target=target_lang
-    ).translate(sentence)
+    try:
 
-    return translated_sentence
+        translated_sentence = GoogleTranslator(
+            source="en-GB",
+            target=target_lang
+        ).translate(sentence)
+
+        return translated_sentence
+
+    except Exception:
+
+        return sentence
+
+
+# ----------------- GENERATE EXAMPLE -----------------
 
 def generate_example(word, lang):
+
+    if not word:
+        return "No example available"
+
     import random
+
     patterns = [
+
         f"I said {word} to my friend.",
+
         f"She used {word} in a conversation.",
+
         f"They greeted me with {word}.",
+
         f"I hear {word} often in daily life."
+
     ]
 
     base_sentence = random.choice(patterns)
 
     try:
+
         translated = GoogleTranslator(
-            source="en",
+            source="en-GB",
             target=lang
         ).translate(base_sentence)
 
         return translated
 
-    except:
+    except Exception:
+
         return base_sentence
-    
+
+
+# ----------------- MEANING -----------------
+
 def get_meaning(word):
+
+    if not word:
+        return "No meaning available."
+
     return f"'{word}' is a translated word used in daily conversation."
 
-# ---------- TEXT TRANSLATION ROUTE
-@app.route('/text-translation', methods=['GET','POST'])
+
+# ----------------- SUPPORTED LANGUAGES -----------------
+
+SUPPORTED_TRANSLATION_LANGUAGES = {
+
+    "Tamil": "ta",
+
+    "Hindi": "hi",
+
+    "Telugu": "te",
+
+    "Kannada": "kn",
+
+    "English": "en",
+
+    "Malayalam": "ml"
+
+}
+
+
+# ----------------- TEXT TRANSLATION ROUTE -----------------
+
+@app.route('/text-translation', methods=['GET', 'POST'])
 def text_translation():
 
     translated_text = ""
+
     example_sentence = ""
+
     input_text = ""
 
     if request.method == "POST":
 
-        input_text = request.form.get("input_text")
-        output_lang = request.form.get("output_lang")
+        input_text = request.form.get(
+            "input_text",
+            ""
+        ).strip()
 
-        translated_text = hybrid_translate(input_text, output_lang)
+        output_lang = request.form.get(
+            "output_lang",
+            "en"
+        )
 
-        # convert to English
-        english_word = GoogleTranslator(
-            source="auto",
-            target="en"
-        ).translate(translated_text)
+        # Check whether selected language is supported
+        if output_lang not in SUPPORTED_TRANSLATION_LANGUAGES.values():
 
-        # generate English example
-        example_sentence = smart_example(english_word)
+            return render_template(
+                "text_translation.html",
+                translated_text="Unsupported target language.",
+                example_sentence="",
+                input_text=input_text
+            )
+
+        # Translate
+        translated_text = hybrid_translate(
+            input_text,
+            output_lang
+        )
+
+        # Generate example without translating
+        # the translated result back to English.
+        example_sentence = smart_example(
+            input_text
+        )
 
     return render_template(
         "text_translation.html",
@@ -959,10 +1176,18 @@ def text_translation():
         input_text=input_text
     )
 
+
+# ----------------- SIMPLE EXAMPLE -----------------
+
 def simple_example(word):
+
     return f"This is an example using '{word}'."
 
-# --------------VOICE ROUTE (ONLINE gTTS)
+
+# ----------------- VOICE ROUTE -----------------
+# Online gTTS
+# Offline pyttsx3 fallback
+
 @app.route("/speak", methods=["POST"])
 def speak():
 
@@ -972,32 +1197,50 @@ def speak():
     lang = data.get("lang")
 
     if not text:
-        return jsonify({"error": "No text"}), 400
+
+        return jsonify({
+            "error": "No text"
+        }), 400
 
     try:
 
         if not os.path.exists("static"):
+
             os.makedirs("static")
 
         file_path = "static/output.mp3"
 
         try:
-            # 🌐 ONLINE voice
-            tts = gTTS(text=text, lang=lang)
+
+            # Online voice
+            tts = gTTS(
+                text=text,
+                lang=lang
+            )
+
             tts.save(file_path)
 
-        except:
-            # 💻 OFFLINE voice
+        except Exception:
+
+            # Offline voice
             engine = pyttsx3.init()
-            engine.save_to_file(text, file_path)
+
+            engine.save_to_file(
+                text,
+                file_path
+            )
+
             engine.runAndWait()
 
         return jsonify({
             "audio_url": "/static/output.mp3"
         })
 
-    except Exception as e:
-        return jsonify({"error": "Voice failed"}), 500
+    except Exception:
+
+        return jsonify({
+            "error": "Voice failed"
+        }), 500
 
 # import os
 
