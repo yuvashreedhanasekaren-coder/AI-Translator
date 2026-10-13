@@ -47,14 +47,18 @@ The dictionary module is designed to provide:
 
 ### 🖼️ Image Translation
 
-The image translation module is designed to:
+The image translation module extracts text from uploaded images using OCR and translates the detected text into the user's selected target language.
 
-- Accept an image as input
-- Extract text from the image using OCR
-- Process the extracted text
-- Translate the detected text into the selected language
+**Features:**
+- Upload an image containing text.
+- Extract text using OCR (Optical Character Recognition).
+- Process the extracted text.
+- Translate the detected text into the selected target language.
+- Display the extracted text and translated output.
 
-> **Current Status:** 🚧 Testing
+**Current Status:** ✅ Implemented and working; testing and improvements are ongoing.
+
+Image translation has been tested with sample images containing English and Hindi text, with translations into Indian languages such as Tamil, Telugu, and Kannada. Results may vary depending on image quality, OCR accuracy, and translation service availability.
 
 ---
 
