@@ -963,51 +963,51 @@ def offline_translate(text, target_lang):
     return None
 
 # ----------------- HYBRID TRANSLATE -----------------
-def hybrid_translate(text, target_lang):
+import requests
 
-    if not text:
+def hybrid_translate(text, target_lang):
+    if not text or not text.strip():
         return "Please enter some text."
 
-    language_names = {
-        "ta": "Tamil",
-        "hi": "Hindi",
-        "te": "Telugu",
-        "kn": "Kannada",
-        "ml": "Malayalam",
-        "en": "English"
+    supported_languages = {
+        "ta": "ta",
+        "en": "en",
+        "te": "te",
+        "kn": "kn"
     }
 
-    target_language = language_names.get(target_lang)
+    target = supported_languages.get(target_lang)
 
-    if not target_language:
+    if not target:
         return "Unsupported target language."
 
     try:
-        response = client.responses.create(
-            model="gpt-5.6-luna",
-            input=f"""
-Translate the following text into {target_language}.
-
-Rules:
-- Return ONLY the translated text.
-- Do not explain anything.
-- Preserve the original meaning.
-- Do not add quotation marks.
-
-Text:
-{text}
-"""
+        response = requests.get(
+            "https://api.mymemory.translated.net/get",
+            params={
+                "q": text.strip(),
+                "langpair": f"hi|{target}"
+            },
+            timeout=20
         )
 
-        translated = response.output_text.strip()
+        response.raise_for_status()
+        data = response.json()
 
-        if translated:
-            return translated
+        if data.get("responseStatus") == 200:
+            result = data.get("responseData", {}).get(
+                "translatedText", ""
+            ).strip()
+
+            if result:
+                return result
+
+        print("MyMemory API response:", data)
+        return "Translation failed. Please try again."
 
     except Exception as e:
-        print("OpenAI Translation Error:", e)
-
-    return "Translation failed"
+        print("MyMemory Translation Error:", repr(e))
+        return "Translation failed. Please try again."
 
 # ----------------- SENTENCE GENERATOR -----------------
 
