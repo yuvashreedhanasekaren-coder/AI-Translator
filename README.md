@@ -16,6 +16,27 @@ to build an end-to-end translation platform.
 > final release.
 
 ---
+## 📊 Feature Status
+
+| Feature | Status |
+|---|---|
+| User Account System | ✅ Working |
+| Admin System | ✅ Working |
+| Admin Protection | ✅ Working |
+| Deleted Account Management | ✅ Working |
+| Image Translation | ✅ Working |
+| Video Translation | 🧪 Testing |
+| YouTube Translation | 🧪 Testing |
+| Live Translation | 🧪 Testing |
+| Text Translation | 🧪 Testing |
+
+**Status Legend:**
+- ✅ **Working** — Implemented and currently working in testing.
+- 🧪 **Testing** — Under testing, debugging, and improvement.
+
+> **Note:** The project is still under development. Features marked as working have been tested, while features marked as testing may require further improvements before the final release.
+
+---
 
 ## ✨ Features
 
