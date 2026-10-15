@@ -25,10 +25,10 @@ to build an end-to-end translation platform.
 | Admin Protection | ✅ Working |
 | Deleted Account Management | ✅ Working |
 | Image Translation | ✅ Working |
+| Text Translation | ✅ Working |
 | Video Translation | 🧪 Testing |
 | YouTube Translation | 🧪 Testing |
 | Live Translation | 🧪 Testing |
-| Text Translation | 🧪 Testing |
 
 **Status Legend:**
 - ✅ **Working** — Implemented and currently working in testing.
