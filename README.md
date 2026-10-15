@@ -44,10 +44,10 @@ to build an end-to-end translation platform.
 
 - Translate user-provided text into a selected target language.
 - Supports multilingual input and output processing.
-- Translation output is currently being tested for accuracy and reliability.
-- Different translation backends are being evaluated during development.
+- Translation output is being tested and improved for accuracy and reliability.
+- Different translation backends are evaluated to improve translation quality and stability.
 
-> **Current Status:** 🚧 Testing and debugging
+> **Current Status:** ✅ Working
 
 ---
 
@@ -62,7 +62,7 @@ The dictionary module is designed to provide:
 - Audio generation
 - Copy functionality
 
-> **Current Status:** 🚧 Feature implemented and under testing
+> **Current Status:** ✅ Working
 
 ---
 
