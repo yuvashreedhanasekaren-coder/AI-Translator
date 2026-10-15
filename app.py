@@ -963,7 +963,6 @@ def offline_translate(text, target_lang):
     return None
 
 # ----------------- HYBRID TRANSLATE -----------------
-import requests
 
 def hybrid_translate(text, target_lang):
     if not text or not text.strip():
