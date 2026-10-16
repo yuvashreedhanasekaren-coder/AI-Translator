@@ -682,9 +682,19 @@ def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
                     text = "..."
 
                 try:
-                    translated = GoogleTranslator(source="auto", target=target_lang).translate(text)
-                except:
-                    translated = text
+                    translated = GoogleTranslator(source="en",target=target_lang).translate(text)
+
+                    if not translated or not translated.strip():
+                        raise ValueError("Translation returned empty text")
+
+                    print("Original English:", text)
+                    print("Translated text:", translated)
+
+                except Exception as e:
+                    print("Translation failed:", repr(e))
+                    raise RuntimeError(
+                        f"Translation failed for segment: {text}"
+                    ) from e
 
                 translated_text_full += translated + " "
 
@@ -698,14 +708,17 @@ def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
         translated_text_full = "Translation completed"
 
     try:
-        if len(translated_text_full) > 4000:
-            translated_text_full = translated_text_full[:4000]
+        tts = gTTS(
+            text=translated_text_full,
+            lang=target_lang
+        )
+        tts.save(translated_audio_path)
 
-        tts = gTTS(text=translated_text_full, lang=target_lang)
-        tts.save(translated_audio_path)
-    except:
-        tts = gTTS(text=translated_text_full, lang="en")
-        tts.save(translated_audio_path)
+    except Exception as e:
+        print("Target-language voice generation failed:", repr(e))
+        raise RuntimeError(
+            f"Could not generate voice for language: {target_lang}"
+        ) from e
 
     print("✅ Translated audio created")
 
