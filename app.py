@@ -644,69 +644,155 @@ def download_youtube_video(url, unique_id):
 
     return file_path
 
+
 def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
+    import time
+    import requests
 
     print("🔥 Subtitle generation started")
 
     segments, info = whisper_model.transcribe(
-    audio_path,
-    beam_size=5,
-    vad_filter=True,
-    vad_parameters=dict(min_silence_duration_ms=500),
-)
-
-    segments = list(segments)  # convert generator → list
+        audio_path,
+        beam_size=5,
+        vad_filter=True,
+        vad_parameters=dict(min_silence_duration_ms=500),
+    )
+    segments = list(segments)
     print("Segments detected:", len(segments))
 
-    srt_path = os.path.join(app.config["UPLOAD_FOLDER"], f"subtitles_{unique_id}.srt")
-    translated_audio_path = os.path.join(app.config["UPLOAD_FOLDER"], f"translated_audio_{unique_id}.mp3")
+    srt_path = os.path.join(
+        app.config["UPLOAD_FOLDER"],
+        f"subtitles_{unique_id}.srt"
+    )
+    translated_audio_path = os.path.join(
+        app.config["UPLOAD_FOLDER"],
+        f"translated_audio_{unique_id}.mp3"
+    )
 
-    translated_text_full = ""
+    if not segments:
+        raise RuntimeError("No speech detected in the uploaded video.")
 
-    # 🔥 FORCE CREATE FILE EVEN IF NO SEGMENTS
+    original_texts = [seg.text.strip() for seg in segments]
+
+    if not all(original_texts):
+        original_texts = [
+            text if text else "..."
+            for text in original_texts
+        ]
+
+    # Keep unique markers so translated text can be mapped
+    # back to the original subtitle timings.
+    markers = [
+        f"ZXQSEGMENT{i:04d}QXZ"
+        for i in range(1, len(segments) + 1)
+    ]
+
+    combined_text = "\n\n".join(
+        f"{markers[i]}\n{text}"
+        for i, text in enumerate(original_texts)
+    )
+
+    translated_segments = None
+
+    # Attempt 1: Translate all segments in one Google request.
+    try:
+        translated_combined = GoogleTranslator(
+            source="en",
+            target=target_lang
+        ).translate(combined_text)
+
+        import re
+
+        parts = re.split(
+            r"ZXQSEGMENT\d{4}QXZ",
+            translated_combined,
+            flags=re.IGNORECASE
+        )
+
+        if len(parts) == len(segments) + 1:
+            candidate = [part.strip() for part in parts[1:]]
+            if all(candidate):
+                translated_segments = candidate
+
+        if translated_segments is None:
+            raise ValueError(
+                "Google Translate did not preserve subtitle markers."
+            )
+
+        print("✅ Google translation completed")
+
+    except Exception as google_error:
+        print("Google translation failed:", repr(google_error))
+        print("Trying MyMemory as a fallback...")
+
+        # Attempt 2: Use MyMemory with the correct English source.
+        try:
+            response = requests.get(
+                "https://api.mymemory.translated.net/get",
+                params={
+                    "q": combined_text,
+                    "langpair": f"en|{target_lang}",
+                },
+                timeout=20,
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            if data.get("responseStatus") != 200:
+                raise RuntimeError(
+                    data.get("responseDetails", "MyMemory translation failed")
+                )
+
+            translated_combined = data.get(
+                "responseData", {}
+            ).get("translatedText", "").strip()
+
+            import re
+
+            parts = re.split(
+                r"ZXQSEGMENT\d{4}QXZ",
+                translated_combined,
+                flags=re.IGNORECASE
+            )
+
+            if len(parts) != len(segments) + 1:
+                raise RuntimeError(
+                    "MyMemory did not preserve subtitle markers."
+                )
+
+            candidate = [part.strip() for part in parts[1:]]
+            if not all(candidate):
+                raise RuntimeError(
+                    "MyMemory returned empty translated segments."
+                )
+
+            translated_segments = candidate
+            print("✅ MyMemory fallback translation completed")
+
+        except Exception as fallback_error:
+            print("MyMemory fallback failed:", repr(fallback_error))
+            raise RuntimeError(
+                "Translation services failed or could not preserve "
+                "subtitle segments. Please try again later."
+            ) from fallback_error
+
+    translated_text_full = " ".join(translated_segments)
+
+    # Write translated subtitles using original timings.
     with open(srt_path, "w", encoding="utf-8") as f:
-
-        if not segments:
-            print("⚠ No speech detected, creating default subtitle")
-            f.write("1\n")
-            f.write("00:00:00,000 --> 00:00:05,000\n")
-            f.write("No speech detected\n\n")
-            translated_text_full = "No speech detected"
-        else:
-          for i, segment in enumerate(segments, start=1):
-                start = segment.start
-                end = segment.end
-                text = segment.text.strip()
-
-                if not text:
-                    text = "..."
-
-                try:
-                    translated = GoogleTranslator(source="en",target=target_lang).translate(text)
-
-                    if not translated or not translated.strip():
-                        raise ValueError("Translation returned empty text")
-
-                    print("Original English:", text)
-                    print("Translated text:", translated)
-
-                except Exception as e:
-                    print("Translation failed:", repr(e))
-                    raise RuntimeError(
-                        f"Translation failed for segment: {text}"
-                    ) from e
-
-                translated_text_full += translated + " "
-
-                f.write(f"{i}\n")
-                f.write(f"{format_time(start)} --> {format_time(end)}\n")
-                f.write(f"{translated}\n\n")
+        for i, (segment, translated) in enumerate(
+            zip(segments, translated_segments), start=1
+        ):
+            f.write(f"{i}\n")
+            f.write(
+                f"{format_time(segment.start)} --> "
+                f"{format_time(segment.end)}\n"
+            )
+            f.write(f"{translated}\n\n")
 
     print("✅ SRT created at:", srt_path)
 
-    if not translated_text_full.strip():
-        translated_text_full = "Translation completed"
-
+    # Generate audio in the selected target language.
     try:
         tts = gTTS(
             text=translated_text_full,
@@ -721,7 +807,6 @@ def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
         ) from e
 
     print("✅ Translated audio created")
-
     return srt_path, translated_audio_path
 
 def merge_all(video_path, audio_path, subtitle_path, unique_id):
