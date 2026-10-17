@@ -648,6 +648,7 @@ def download_youtube_video(url, unique_id):
 def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
     import time
     import requests
+    from deep_translator import GoogleTranslator
 
     print("🔥 Subtitle generation started")
 
@@ -660,6 +661,9 @@ def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
     segments = list(segments)
     print("Segments detected:", len(segments))
 
+    if not segments:
+        raise RuntimeError("No speech detected in the uploaded video.")
+
     srt_path = os.path.join(
         app.config["UPLOAD_FOLDER"],
         f"subtitles_{unique_id}.srt"
@@ -669,116 +673,92 @@ def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
         f"translated_audio_{unique_id}.mp3"
     )
 
-    if not segments:
-        raise RuntimeError("No speech detected in the uploaded video.")
+    translated_segments = []
 
-    original_texts = [seg.text.strip() for seg in segments]
+    def translate_with_mymemory(text):
+        response = requests.get(
+            "https://api.mymemory.translated.net/get",
+            params={
+                "q": text,
+                "langpair": f"en|{target_lang}",
+            },
+            timeout=20,
+        )
+        response.raise_for_status()
+        data = response.json()
 
-    if not all(original_texts):
-        original_texts = [
-            text if text else "..."
-            for text in original_texts
-        ]
+        if data.get("responseStatus") != 200:
+            raise RuntimeError(
+                data.get("responseDetails", "MyMemory translation failed")
+            )
 
-    # Keep unique markers so translated text can be mapped
-    # back to the original subtitle timings.
-    markers = [
-        f"ZXQSEGMENT{i:04d}QXZ"
-        for i in range(1, len(segments) + 1)
-    ]
-
-    combined_text = "\n\n".join(
-        f"{markers[i]}\n{text}"
-        for i, text in enumerate(original_texts)
-    )
-
-    translated_segments = None
-
-    # Attempt 1: Translate all segments in one Google request.
-    try:
-        translated_combined = GoogleTranslator(
-            source="en",
-            target=target_lang
-        ).translate(combined_text)
-
-        import re
-
-        parts = re.split(
-            r"ZXQSEGMENT\d{4}QXZ",
-            translated_combined,
-            flags=re.IGNORECASE
+        result = (
+            data.get("responseData", {})
+            .get("translatedText", "")
+            .strip()
         )
 
-        if len(parts) == len(segments) + 1:
-            candidate = [part.strip() for part in parts[1:]]
-            if all(candidate):
-                translated_segments = candidate
+        if not result:
+            raise RuntimeError("MyMemory returned empty translation.")
 
-        if translated_segments is None:
-            raise ValueError(
-                "Google Translate did not preserve subtitle markers."
-            )
+        return result
 
-        print("✅ Google translation completed")
+    for i, segment in enumerate(segments, start=1):
+        original_text = segment.text.strip()
 
-    except Exception as google_error:
-        print("Google translation failed:", repr(google_error))
-        print("Trying MyMemory as a fallback...")
+        if not original_text:
+            translated_segments.append("...")
+            continue
 
-        # Attempt 2: Use MyMemory with the correct English source.
-        try:
-            response = requests.get(
-                "https://api.mymemory.translated.net/get",
-                params={
-                    "q": combined_text,
-                    "langpair": f"en|{target_lang}",
-                },
-                timeout=20,
-            )
-            response.raise_for_status()
-            data = response.json()
+        print(f"Translating segment {i}/{len(segments)}: {original_text}")
 
-            if data.get("responseStatus") != 200:
-                raise RuntimeError(
-                    data.get("responseDetails", "MyMemory translation failed")
+        translated = None
+
+        # Try Google Translate, with limited retries for rate limiting.
+        for attempt in range(2):
+            try:
+                result = GoogleTranslator(
+                    source="en",
+                    target=target_lang
+                ).translate(original_text)
+
+                if result and result.strip():
+                    translated = result.strip()
+                    break
+
+                raise RuntimeError("Google returned empty translation.")
+
+            except Exception as error:
+                print(
+                    f"Google failed on segment {i}, "
+                    f"attempt {attempt + 1}: {repr(error)}"
                 )
+                if attempt == 0:
+                    time.sleep(2)
 
-            translated_combined = data.get(
-                "responseData", {}
-            ).get("translatedText", "").strip()
-
-            import re
-
-            parts = re.split(
-                r"ZXQSEGMENT\d{4}QXZ",
-                translated_combined,
-                flags=re.IGNORECASE
-            )
-
-            if len(parts) != len(segments) + 1:
-                raise RuntimeError(
-                    "MyMemory did not preserve subtitle markers."
+        # Fall back to MyMemory for this segment only.
+        if translated is None:
+            try:
+                translated = translate_with_mymemory(original_text)
+                print(f"✅ MyMemory translated segment {i}")
+            except Exception as error:
+                print(
+                    f"MyMemory failed on segment {i}: {repr(error)}"
                 )
-
-            candidate = [part.strip() for part in parts[1:]]
-            if not all(candidate):
                 raise RuntimeError(
-                    "MyMemory returned empty translated segments."
-                )
+                    f"Could not translate subtitle segment {i}. "
+                    "Please try again later."
+                ) from error
 
-            translated_segments = candidate
-            print("✅ MyMemory fallback translation completed")
+        translated_segments.append(translated)
+        time.sleep(0.5)
 
-        except Exception as fallback_error:
-            print("MyMemory fallback failed:", repr(fallback_error))
-            raise RuntimeError(
-                "Translation services failed or could not preserve "
-                "subtitle segments. Please try again later."
-            ) from fallback_error
+    translated_text_full = " ".join(translated_segments).strip()
 
-    translated_text_full = " ".join(translated_segments)
+    if not translated_text_full:
+        raise RuntimeError("Translated text is empty.")
 
-    # Write translated subtitles using original timings.
+    # Write subtitles with the original segment timings.
     with open(srt_path, "w", encoding="utf-8") as f:
         for i, (segment, translated) in enumerate(
             zip(segments, translated_segments), start=1
@@ -792,7 +772,7 @@ def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
 
     print("✅ SRT created at:", srt_path)
 
-    # Generate audio in the selected target language.
+    # Generate target-language speech.
     try:
         tts = gTTS(
             text=translated_text_full,
@@ -800,14 +780,15 @@ def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
         )
         tts.save(translated_audio_path)
 
-    except Exception as e:
-        print("Target-language voice generation failed:", repr(e))
+    except Exception as error:
+        print("Target-language voice generation failed:", repr(error))
         raise RuntimeError(
             f"Could not generate voice for language: {target_lang}"
-        ) from e
+        ) from error
 
     print("✅ Translated audio created")
     return srt_path, translated_audio_path
+
 
 def merge_all(video_path, audio_path, subtitle_path, unique_id):
     output_path = os.path.join(app.config["UPLOAD_FOLDER"], f"final_output_{unique_id}.mkv")
