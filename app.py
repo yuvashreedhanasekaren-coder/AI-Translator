@@ -434,7 +434,6 @@ def reset_password():
 
     return render_template("reset_password.html")
 
-
 # ---------- IMAGE OCR + TRANSLATION ----------
 
 @app.route("/image", methods=["GET", "POST"])
@@ -1119,7 +1118,6 @@ def smart_example(word):
 
     return random.choice(patterns)
 
-
 # ----------------- MULTILINGUAL EXAMPLE -----------------
 
 def smart_multilingual_example(word, target_lang):
@@ -1141,7 +1139,6 @@ def smart_multilingual_example(word, target_lang):
     except Exception:
 
         return sentence
-
 
 # ----------------- GENERATE EXAMPLE -----------------
 
@@ -1179,7 +1176,6 @@ def generate_example(word, lang):
 
         return base_sentence
 
-
 # ----------------- MEANING -----------------
 
 def get_meaning(word):
@@ -1188,7 +1184,6 @@ def get_meaning(word):
         return "No meaning available."
 
     return f"'{word}' is a translated word used in daily conversation."
-
 
 # ----------------- SUPPORTED LANGUAGES -----------------
 
@@ -1207,7 +1202,6 @@ SUPPORTED_TRANSLATION_LANGUAGES = {
     "Malayalam": "ml"
 
 }
-
 
 # ----------------- TEXT TRANSLATION ROUTE -----------------
 
@@ -1261,13 +1255,11 @@ def text_translation():
         input_text=input_text
     )
 
-
 # ----------------- SIMPLE EXAMPLE -----------------
 
 def simple_example(word):
 
     return f"This is an example using '{word}'."
-
 
 # ----------------- VOICE ROUTE -----------------
 # Online gTTS
@@ -1326,18 +1318,6 @@ def speak():
         return jsonify({
             "error": "Voice failed"
         }), 500
-
-# import os
-
-# # 🔥 FIX HERE FIRST
-# os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
-# os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
-
-# from huggingface_hub.utils import logging
-# logging.set_verbosity_error()
-
-# # THEN import
-# from faster_whisper import WhisperModel
 
 # ---------- HOME ----------
 @app.route("/home")
