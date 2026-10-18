@@ -789,23 +789,32 @@ def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
     print("✅ Translated audio created")
     return srt_path, translated_audio_path
 
-
 def merge_all(video_path, audio_path, subtitle_path, unique_id):
-    output_path = os.path.join(app.config["UPLOAD_FOLDER"], f"final_output_{unique_id}.mkv")
+    output_path = os.path.join(
+        app.config["UPLOAD_FOLDER"],
+        f"final_output_{unique_id}.mkv"
+    )
+
     command = [
-    "ffmpeg", "-y",
-    "-i", video_path,
-    "-i", audio_path,
-    "-i", subtitle_path,
-    "-map", "0:v",
-    "-map", "1:a",
-    "-c:v", "copy",
-    "-c:a", "aac",
-    "-c:s", "srt",
-    output_path
-]
+        "ffmpeg", "-y",
+        "-i", video_path,
+        "-i", audio_path,
+        "-i", subtitle_path,
+        "-map", "0:v:0",
+        "-map", "1:a:0",
+        "-map", "2:0",
+        "-c:v", "copy",
+        "-c:a", "aac",
+        "-c:s", "srt",
+        "-disposition:s:0", "default",
+        output_path
+    ]
+
     subprocess.run(command, check=True)
+    print("✅ Video, translated audio and subtitles merged:", output_path)
+
     return output_path
+
 
 # ------------------ FLASK ROUTES ------------------
 
