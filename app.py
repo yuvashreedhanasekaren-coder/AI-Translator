@@ -644,7 +644,6 @@ def download_youtube_video(url, unique_id):
 
     return file_path
 
-
 def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
     import time
     import requests
@@ -814,7 +813,6 @@ def merge_all(video_path, audio_path, subtitle_path, unique_id):
     print("✅ Video, translated audio and subtitles merged:", output_path)
 
     return output_path
-
 
 # ------------------ FLASK ROUTES ------------------
 
