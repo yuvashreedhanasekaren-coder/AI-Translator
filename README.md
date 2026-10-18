@@ -26,7 +26,7 @@ to build an end-to-end translation platform.
 | Deleted Account Management | ✅ Working |
 | Image Translation | ✅ Working |
 | Text Translation | ✅ Working |
-| Video Translation | 🧪 Testing |
+| Video Translation | ✅ Working with subtitle-track merging tested |
 | YouTube Translation | 🧪 Testing |
 | Live Translation | 🧪 Testing |
 
@@ -85,19 +85,21 @@ Image translation has been tested with sample images containing English and Hind
 
 ### 🎥 Video Translation
 
-The video translation module is designed to:
+The video translation module processes uploaded videos and generates translated audio and subtitle output.
 
-- Accept an uploaded video
-- Extract audio from the video
-- Convert speech into text
-- Translate the extracted speech
-- Generate translated audio
-- Process the translated output
+**Features:**
 
-The project uses speech recognition and multimedia processing tools to
-build the video translation pipeline.
+- Accept an uploaded video.
+- Extract audio from the video using FFmpeg.
+- Convert speech into text using speech recognition.
+- Translate the extracted speech into the selected target language.
+- Generate translated audio.
+- Generate SRT subtitles for the translated speech.
+- Merge the original video, translated audio, and subtitle track into the final output video.
 
-> **Current Status:** 🚧 Testing and debugging
+The final translated video is generated in **MKV format** with the translated audio and subtitle track included.
+
+> **Current Status:** 🧪 Implemented and tested successfully for video processing, translated audio generation, and subtitle-track merging. Further testing is ongoing to improve translation reliability, subtitle timing, and overall output quality.
 
 ---
 
