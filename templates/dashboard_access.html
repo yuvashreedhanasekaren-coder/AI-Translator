@@ -1,0 +1,162 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Password Verification - AI Translator</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #f8f1e7;
+            background:
+                radial-gradient(circle at 10% 15%, rgba(184,115,51,.20), transparent 30%),
+                radial-gradient(circle at 90% 85%, rgba(120,53,15,.25), transparent 30%),
+                #1c1410;
+        }
+
+        .password-card {
+            width: 100%;
+            max-width: 430px;
+            padding: 35px;
+            text-align: center;
+            background: #2d1e17;
+            border: 1px solid rgba(205,133,63,.4);
+            border-radius: 22px;
+            box-shadow: 0 25px 70px rgba(0,0,0,.5);
+        }
+
+        .lock {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            color: #e09a52;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #c9a98b;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 15px;
+            margin-bottom: 15px;
+            background: #1c1410;
+            color: #fff;
+            border: 1px solid rgba(205,133,63,.35);
+            border-radius: 10px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input:focus {
+            border-color: #d08a45;
+        }
+
+        .verify-btn,
+        .back-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: .3s ease;
+        }
+
+        .verify-btn {
+            border: none;
+            background: #b87333;
+            color: white;
+        }
+
+        .verify-btn:hover {
+            background: #d08a45;
+        }
+
+        .back-btn {
+            margin-top: 12px;
+            border: 1px solid rgba(205,133,63,.35);
+            color: #c9a98b;
+        }
+
+        .back-btn:hover {
+            background: rgba(184,115,51,.12);
+            color: #e09a52;
+        }
+
+        .error {
+            color: #ff9999;
+            font-size: 13px;
+            margin-bottom: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="password-card">
+
+        <div class="lock">🔐</div>
+
+        <h2>Password Verification</h2>
+
+        <p class="description">
+            Enter your account password to access the User Dashboard.
+        </p>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST">
+            <input
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                required
+                autofocus
+            >
+
+            <button type="submit" class="verify-btn">
+                Verify & Continue
+            </button>
+        </form>
+
+        <a href="{{ url_for('admin_dashboard') }}" class="back-btn">
+            ← Back to Admin Dashboard
+        </a>
+
+    </div>
+
+</body>
+</html>
+```

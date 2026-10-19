@@ -1638,7 +1638,42 @@ def admin():
         "admin.html",
         error=error
     )
-# ---------- PROFILE ----------
+
+# ---------- USER DASHBOARD PASSWORD VERIFICATION ----------
+
+@app.route("/dashboard-access", methods=["GET", "POST"])
+def dashboard_access():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    db = get_db()
+
+    user = db.execute("""
+        SELECT password, is_admin
+        FROM users
+        WHERE id = ? AND is_deleted = 0
+    """, (session["user_id"],)).fetchone()
+
+    if not user:
+        session.clear()
+        return redirect(url_for("login"))
+
+    error = None
+
+    if request.method == "POST":
+
+        entered_password = request.form.get("password", "")
+
+        if check_password_hash(user["password"], entered_password):
+            return redirect(url_for("home"))
+
+        error = "Incorrect password. Please try again."
+
+    return render_template(
+        "dashboard_access.html",
+        error=error
+    )
 
 # ---------- PROFILE ----------
 
@@ -1678,8 +1713,4 @@ def profile():
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
-
-
-
-
 
