@@ -1,4 +1,4 @@
-from pydoc import text
+﻿from pydoc import text
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, session, g, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from deep_translator import GoogleTranslator, MyMemoryTranslator
@@ -17,7 +17,8 @@ import pytesseract
 import librosa
 import whisper
 import torch
-from gtts import gTTS 
+from gtts import gTTS
+from pydub import AudioSegment 
 import sounddevice as sd
 from PIL import Image, ImageOps
 from flask_mail import Mail, Message
@@ -628,7 +629,7 @@ def download_youtube_video(url, unique_id):
         "User-Agent": "Mozilla/5.0"
     },
 
-    # 🔥 USE THIS ONLY
+    # ðŸ”¥ USE THIS ONLY
     "cookiefile": "cookies.txt",
 
     "extractor_args": {
@@ -648,7 +649,7 @@ def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
     import requests
     from deep_translator import GoogleTranslator
 
-    print("🔥 Subtitle generation started")
+    print("ðŸ”¥ Subtitle generation started")
 
     segments, info = whisper_model.transcribe(
         audio_path,
@@ -738,7 +739,7 @@ def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
         if translated is None:
             try:
                 translated = translate_with_mymemory(original_text)
-                print(f"✅ MyMemory translated segment {i}")
+                print(f"âœ… MyMemory translated segment {i}")
             except Exception as error:
                 print(
                     f"MyMemory failed on segment {i}: {repr(error)}"
@@ -768,7 +769,7 @@ def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
             )
             f.write(f"{translated}\n\n")
 
-    print("✅ SRT created at:", srt_path)
+    print("âœ… SRT created at:", srt_path)
 
     # Generate target-language speech.
     try:
@@ -784,7 +785,7 @@ def generate_subtitles_and_audio(audio_path, target_lang, unique_id):
             f"Could not generate voice for language: {target_lang}"
         ) from error
 
-    print("✅ Translated audio created")
+    print("âœ… Translated audio created")
     return srt_path, translated_audio_path
 
 def merge_all(video_path, audio_path, subtitle_path, unique_id):
@@ -809,7 +810,7 @@ def merge_all(video_path, audio_path, subtitle_path, unique_id):
     ]
 
     subprocess.run(command, check=True)
-    print("✅ Video, translated audio and subtitles merged:", output_path)
+    print("âœ… Video, translated audio and subtitles merged:", output_path)
 
     return output_path
 
@@ -868,21 +869,21 @@ def final_video(job_id):
 
 def process_video_job(url, language, unique_id):
     try:
-        print("⬇️ Downloading video...")
+        print("â¬‡ï¸ Downloading video...")
         video_jobs[unique_id]["status"] = "downloading"
         video_path = download_youtube_video(url, unique_id)
 
-        print("🎧 Extracting audio...")
+        print("ðŸŽ§ Extracting audio...")
         video_jobs[unique_id]["status"] = "extracting_audio"
         audio_path = extract_audio(video_path, unique_id)
 
-        print("🧠 Transcribing...")
+        print("ðŸ§  Transcribing...")
         video_jobs[unique_id]["status"] = "transcribing"
         subtitle_path, translated_audio = generate_subtitles_and_audio(
             audio_path, language, unique_id
         )
 
-        print("🎬 Merging video...")
+        print("ðŸŽ¬ Merging video...")
         video_jobs[unique_id]["status"] = "merging"
 
         final_output_path = merge_all(
@@ -892,12 +893,12 @@ def process_video_job(url, language, unique_id):
             unique_id
         )
 
-        print("✅ Completed!")
+        print("âœ… Completed!")
         video_jobs[unique_id]["status"] = "completed"
         video_jobs[unique_id]["output"] = os.path.basename(final_output_path)
 
     except Exception as e:
-        print("❌ ERROR:", e)
+        print("âŒ ERROR:", e)
         video_jobs[unique_id]["status"] = "error"
         video_jobs[unique_id]["output"] = str(e)
         
@@ -948,9 +949,9 @@ def video_translation():
             video_path = os.path.join(app.config["UPLOAD_FOLDER"], f"input_video_{unique_id}.mp4")
             video.save(video_path)
             audio_path = extract_audio(video_path, unique_id)
-            print("🚀 Calling subtitle function...")
+            print("ðŸš€ Calling subtitle function...")
             subtitle_path, translated_audio = generate_subtitles_and_audio(audio_path, language, unique_id)
-            print("🚀 Subtitle function finished")
+            print("ðŸš€ Subtitle function finished")
             final_video = merge_all(video_path, translated_audio, subtitle_path, unique_id)
             return render_template("video_output.html", translated_video=os.path.basename(final_video))
         except Exception as e:
@@ -989,8 +990,6 @@ def live_translate():
         translated = text
 
     return jsonify({"translated": translated})
-
-from gtts import gTTS
 
 @app.route("/generate_voice", methods=["POST"])
 def generate_voice():
@@ -1653,3 +1652,8 @@ def profile():
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
+
+
+
+
+
