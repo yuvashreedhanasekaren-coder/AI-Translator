@@ -1530,11 +1530,17 @@ def admin_user_details(user_id):
     """, (user_id,)).fetchone()
 
     if not user:
-        return redirect(url_for("admin_dashboa"))
+        return redirect(url_for("admin_dashboard"))
+
+    total_users = db.execute("""
+        SELECT COUNT(*) FROM users
+        WHERE is_deleted=0
+    """).fetchone()[0]
 
     return render_template(
         "admin_user_details.html",
-        user=user
+        user=user,
+        total_users=total_users
     )
 
 # ---------- DELETED ACCOUNTS ----------
@@ -1633,22 +1639,42 @@ def admin():
         error=error
     )
 # ---------- PROFILE ----------
+
+# ---------- PROFILE ----------
+
 @app.route("/profile")
 def profile():
+
     if "user_id" not in session:
         return redirect(url_for("login"))
 
     db = get_db()
 
-    user = db.execute(
-        "SELECT username, email, purpose FROM users WHERE id=?",
-        (session["user_id"],)
-    ).fetchone()
+    user = db.execute("""
+        SELECT id, username, email, purpose, is_admin
+        FROM users
+        WHERE id = ? AND is_deleted = 0
+    """, (session["user_id"],)).fetchone()
 
     if not user:
+        session.clear()
         return redirect(url_for("login"))
 
-    return render_template("profile.html", user=user)
+    total_users = None
+
+    # Show total registered users only to Admin
+    if user["is_admin"]:
+        total_users = db.execute("""
+            SELECT COUNT(*)
+            FROM users
+            WHERE is_deleted = 0
+        """).fetchone()[0]
+
+    return render_template(
+        "profile.html",
+        user=user,
+        total_users=total_users
+    )
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
